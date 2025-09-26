@@ -1,14 +1,3 @@
--- Tạo ENUM cho giới tính
-CREATE TYPE gender_enum AS ENUM ('male', 'female', 'other');
-
--- Tạo ENUM cho trạng thái user
-CREATE TYPE status_user AS ENUM ('active', 'inactive', 'banned');
-
--- Tạo ENUM cho loại poster
-CREATE TYPE poster_enum AS ENUM ('image', 'video', 'text');
-
--- Tạo ENUM cho reaction
-CREATE TYPE reaction_enum AS ENUM ('like', 'love', 'haha', 'wow', 'sad', 'angry');
 
 
 -- Bảng user
@@ -20,9 +9,9 @@ CREATE TABLE "user" (
     email VARCHAR(255) UNIQUE,
     full_name VARCHAR(255),
     refresh_token TEXT,
-    gender gender_enum,
+    gender varchar(255),
     dob DATE,
-    status_user status_user,
+    status_user varchar(255),
     create_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
     update_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
     role_id BIGINT
@@ -58,6 +47,9 @@ CREATE TABLE photo (
     metadata JSONB,
     deleted_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+	liked BOOLEAN DEFAULT FALSE,
+	update_at TIMESTAMP WITH TIME ZONE,
+	is_deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES "user"(user_id)
 );
 
@@ -95,7 +87,7 @@ CREATE TABLE poster (
     title VARCHAR(255),
     content TEXT,
     file_path VARCHAR(255),
-    poster_type poster_enum,
+    poster_type VARCHAR(255),
     create_date DATE DEFAULT CURRENT_DATE,
     update_date DATE,
     created_by VARCHAR(255),
@@ -114,7 +106,7 @@ CREATE TABLE poster_reaction (
     reaction_id BIGINT PRIMARY KEY,
     poster_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    reaction reaction_enum,
+    reaction varchar(255),
     create_date TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (poster_id) REFERENCES poster(poster_id),
     FOREIGN KEY (user_id) REFERENCES "user"(user_id)
