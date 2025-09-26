@@ -4,7 +4,7 @@
       <img
         :src="form.logo"
         alt="Zambora"
-        style="position: absolute; top: 20px; left: 20px; width: 180px; opacity: 0.8"
+        style="position: absolute; top: 20px; left: 20px; width: 180px"
       />
       <div class="headline">{{ form.headline }}</div>
       <div class="headline">{{ form.subheadline }}</div>

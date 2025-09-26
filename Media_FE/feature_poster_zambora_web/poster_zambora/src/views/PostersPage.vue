@@ -15,7 +15,7 @@
           <div class="card-bd">
             <div class="field">
               <label>Loại Poster</label>
-              <select class="select" v-model="form.template">
+              <select class="select" v-model="activeTemplate">
                 <option value="new-hire">Nhân viên mới</option>
                 <option value="recognition">Vinh danh</option>
               </select>
@@ -26,71 +26,81 @@
                 <label>Tiêu đề</label>
                 <input
                   class="input"
-                  v-model="form.headline"
+                  v-model="activeForm.headline"
                   placeholder="CHÀO MỪNG BẠN ĐẾN VỚI"
                 />
               </div>
               <div class="field">
                 <label>Thương hiệu</label>
-                <input class="input" v-model="form.subheadline" placeholder="REVOTECH" />
+                <input
+                  class="input"
+                  v-model="activeForm.subheadline"
+                  placeholder="REVOTECH"
+                />
               </div>
             </div>
 
             <div class="grid-2">
               <div class="field">
                 <label>Họ tên</label>
-                <input class="input" v-model="form.name" placeholder="Họ tên" />
+                <input class="input" v-model="activeForm.name" placeholder="Họ tên" />
               </div>
-              <div class="field">
+              <div class="field" v-if="activeTemplate === 'new-hire'">
                 <label>Chức danh</label>
-                <input class="input" v-model="form.role" placeholder="Chức danh" />
+                <input class="input" v-model="activeForm.role" placeholder="Chức danh" />
               </div>
             </div>
 
-            <div class="grid-2" v-if="form.template === 'new-hire'">
+            <!-- new-hire -->
+            <div class="grid-2" v-if="activeTemplate === 'new-hire'">
               <div class="field">
                 <label>Năm sinh</label>
-                <input class="input" v-model="form.yob" placeholder="1999" />
+                <input class="input" v-model="activeForm.yob" placeholder="1999" />
               </div>
               <div class="field">
                 <label>Quê quán</label>
-                <input class="input" v-model="form.hometown" placeholder="Hà Nội" />
+                <input class="input" v-model="activeForm.hometown" placeholder="Hà Nội" />
               </div>
             </div>
 
-            <div class="grid-2">
+            <div class="grid-2" v-if="activeTemplate === 'new-hire'">
               <div class="field">
                 <label>Màu chủ đạo</label>
-                <input class="input" type="color" v-model="form.primary" />
+                <input class="input" type="color" v-model="activeForm.primary" />
               </div>
             </div>
 
-            <!-- --- KHU VỰC UPLOAD: ĐÃ THAY BẰNG UL/LI DROPDOWN --- -->
+            <!-- recognition -->
+            <div class="grid-2" v-if="activeTemplate === 'recognition'">
+              <div class="field">
+                <label>Tháng</label>
+                <input class="input" v-model="activeForm.month" placeholder="5" />
+              </div>
+              <div class="field">
+                <label>Năm</label>
+                <input class="input" v-model="activeForm.year" placeholder="2025" />
+              </div>
+            </div>
+
+            <!-- Upload -->
             <div class="grid-2">
               <div class="field">
-                <!-- input ẩn để chọn từ máy -->
+                <input
+                  id="avatarInput"
+                  type="file"
+                  accept="image/*"
+                  style="display: none"
+                  @change="onFile('avatar', $event)"
+                />
                 <table class="upload-table">
-                  <input
-                    id="avatarInput"
-                    type="file"
-                    accept="image/*"
-                    style="display: none"
-                    @change="onFile('avatar', $event)"
-                  />
                   <tbody>
                     <tr>
+                      <td><label for="avatarInput">Ảnh nhân viên</label></td>
                       <td>
-                        <!-- Cột 1 -->
-                        <label for="avatarInput">Ảnh nhân viên</label>
-                      </td>
-                      <td>
-                        <!-- Cột 2 -->
                         <div class="upload-wrap">
                           <a href="javascript:void(0)" class="upload-btn">
                             <i class="pi pi-plus"></i>
                           </a>
-
-                          <!-- Dropdown -->
                           <ul class="dropdown">
                             <li @click="">Chọn từ album</li>
                             <li @click="triggerDeviceUpload">Chọn từ máy</li>
@@ -102,14 +112,18 @@
                 </table>
               </div>
             </div>
-            <!-- --- HẾT KHU VỰC UPLOAD --- -->
+            <!-- End upload -->
           </div>
         </div>
 
         <!-- Panel phải: Stage poster -->
         <div class="poster-shell">
           <div class="poster-surface" id="exportTarget">
-            <component :is="currentPoster" :form="form" />
+            <component
+              :is="currentPoster"
+              :form="activeForm"
+              :key="activeTemplate"
+            />
           </div>
         </div>
       </div>
@@ -118,77 +132,104 @@
 </template>
 
 <script setup>
-import { reactive, computed, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import PosterNewHire from "@/components/PosterNewHire.vue";
 import PosterRecognition from "@/components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 
-const form = reactive({
+const formNewHire = reactive({
   template: "new-hire",
   headline: "CHÀO MỪNG BẠN ĐẾN VỚI",
-  subheadline: "REVOTECH",
-  name: "Đỗ Thị Hồng Phước",
-  role: "Tester",
-  yob: "1999",
-  hometown: "Hà Nội",
+  subheadline: "TÊN CÔNG TY",
+  name: "TÊN NHÂN VIÊN",
+  role: "VỊ TRÍ CÔNG VIỆC",
+  yob: "NĂM SINH",
+  hometown: "QUÊ QUÁN",
   logo: defaultLogo,
   avatar: "",
   primary: "#1d4ed8",
 });
+const formRecognition = reactive({
+  template: "recognition",
+  headline: "CÔNG TY CỔ PHẦN PHẦN MỀM",
+  subheadline: "TÊN CÔNG TY",
+  name: "",
+  logo: defaultLogo,
+  avatar: "",
+  month: "1",
+  year: "2024",
+});
+
+const activeTemplate = ref("new-hire");
+
+const activeForm = computed(() =>
+  activeTemplate.value === "new-hire" ? formNewHire : formRecognition
+);
 
 const currentPoster = computed(() =>
-  form.template === "new-hire" ? PosterNewHire : PosterRecognition
+  activeTemplate.value === "new-hire" ? PosterNewHire : PosterRecognition
 );
 
 function triggerDeviceUpload() {
   document.getElementById("avatarInput")?.click();
 }
-function openAlbumPicker() {
-  showAlbum.value = true;
-}
-function pickFromAlbum(url) {
-  form.avatar = url;
-  showAlbum.value = false;
-}
-// --- hết phần dropdown ---
-
 function onFile(key, e) {
   const f = e.target.files?.[0];
   if (!f) return;
   const reader = new FileReader();
-  reader.onload = () => (form[key] = reader.result);
+  reader.onload = () => (activeForm.value[key] = reader.result);
   reader.readAsDataURL(f);
 }
 function reset() {
-  Object.assign(form, {
-    template: "new-hire",
-    headline: "CHÀO MỪNG BẠN ĐẾN VỚI",
-    subheadline: "REVOTECH",
-    name: "",
-    role: "",
-    yob: "",
-    hometown: "",
-    logo: "",
-    avatar: "",
-    primary: "#1d4ed8",
-    accent: "#00c2ff",
-    showMeta: true,
-  });
+  if (activeTemplate.value === "new-hire") {
+    Object.assign(formNewHire, {
+      template: "new-hire",
+      headline: "CHÀO MỪNG BẠN ĐẾN VỚI",
+      subheadline: "TÊN CÔNG TY",
+      name: "TÊN NHÂN VIÊN",
+      role: "VỊ TRÍ CÔNG VIỆC",
+      yob: "NĂM SINH",
+      hometown: "QUÊ QUÁN",
+      logo: defaultLogo,
+      avatar: "",
+      primary: "#1d4ed8",
+    });
+  } else {
+    Object.assign(formRecognition, {
+      template: "recognition",
+      headline: "CÔNG TY CỔ PHẦN PHẦN MỀM",
+      subheadline: "TÊN CÔNG TY",
+      name: "",
+      role: "",
+      logo: defaultLogo,
+      avatar: "",
+      month: String(new Date().getMonth() + 1),
+      year: String(new Date().getFullYear()),
+    });
+  }
 }
 function saveDraft() {
-  localStorage.setItem("poster-draft", JSON.stringify(form));
+  localStorage.setItem(
+    `poster-draft-${activeTemplate.value}`,
+    JSON.stringify(activeForm.value)
+  );
   alert("Đã lưu nháp!");
 }
 async function exportPng() {
   const el = document.getElementById("exportTarget");
   const canvas = await html2canvas(el, { backgroundColor: "#fff", scale: 2 });
   const a = document.createElement("a");
-  a.download = `${form.template}-${form.name || "poster"}.png`;
+  a.download = `${activeTemplate.value}-${activeForm.value.name || "poster"}.png`;
   a.href = canvas.toDataURL("image/png");
   a.click();
 }
 </script>
+
+<style scoped>
+/* giữ nguyên style cũ của bạn */
+</style>
+
 
 <style scoped>
 .field table {
