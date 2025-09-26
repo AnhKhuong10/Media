@@ -1,0 +1,103 @@
+/* ===== Design Tokens ===== */
+:root{
+  --surface:#0b1227;
+  --side:#0f172a;
+  --paper:#ffffff;
+  --muted:#6b7280;
+  --text:#0f172a;
+  --ring:#dfe3ea;
+  --brand:#2563eb;
+  --brand-2:#00c2ff;
+  --bg:#f5f7fb;
+}
+
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{
+  margin:0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 70% -20%, rgba(37,99,235,.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, rgba(0,194,255,.08), transparent 60%),
+    var(--bg);
+}
+
+/* ===== Layout ===== */
+.app{display:grid; grid-template-columns: 280px 1fr; height:100vh}
+.main{display:grid; grid-template-rows: 72px 1fr; overflow:hidden}
+.container{
+  height:100%; overflow:auto;
+  padding:28px;
+  display:flex; justify-content:center;
+}
+.wrap{
+  width:min(1280px, 100%);
+  display:grid; gap:22px;
+}
+
+/* ===== Sidebar ===== */
+.sidebar{
+  background:linear-gradient(180deg, var(--side), #0c1534 60%, #0a1330);
+  color:#e5ecff; padding:20px 16px; display:flex; flex-direction:column; gap:18px;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.brandline{display:flex; align-items:center; gap:12px}
+.badge{width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg, var(--brand), var(--brand-2));
+  display:grid;place-items:center;color:white;font-weight:900}
+.brand{font-weight:900; letter-spacing:.2px}
+.sub{font-size:12px; opacity:.7; font-weight:600}
+.nav{display:flex; flex-direction:column; gap:8px; margin-top:6px}
+.nav a{
+  text-decoration:none; color:#cbd5ff; font-weight:700;
+  padding:11px 12px; border-radius:12px; display:flex; align-items:center; gap:10px;
+}
+.nav a:hover,.nav a.active{ background:rgba(255,255,255,.08); color:#fff}
+.sb-foot{margin-top:auto; font-size:12px; opacity:.7}
+
+/* ===== Header ===== */
+.header{
+  background:var(--surface); color:#e5ecff; display:flex; align-items:center; justify-content:space-between;
+  padding:0 22px; border-bottom:1px solid rgba(255,255,255,.07)
+}
+.h-title{font-weight:900; letter-spacing:.3px}
+.actions{display:flex; gap:10px}
+
+/* ===== Cards / inputs ===== */
+.card{
+  background:var(--paper); border:1px solid var(--ring); border-radius:16px;
+  box-shadow: 0 10px 30px rgba(15,23,42,.06);
+}
+.card-hd{padding:14px 18px; border-bottom:1px solid #eef1f5; font-weight:900}
+.card-bd{padding:18px}
+
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
+.btn{
+  appearance:none; border:1px solid transparent; background:var(--brand); color:#fff;
+  border-radius:12px; padding:10px 14px; font-weight:800; cursor:pointer
+}
+.btn.secondary{background:#111827}
+.btn.ghost{background:#fff;border-color:#d1d5db;color:#111827}
+.btn:active{transform:translateY(1px)}
+
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+.field label{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); font-weight:900}
+.input, .select, textarea, input[type='color']{
+  width:100%; border:1px solid #dde2ea; border-radius:12px; padding:11px 12px; background:#fff; font-weight:600;
+}
+.grid-2{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+
+/* ===== Poster area ===== */
+.stage{
+  display:grid; grid-template-columns: 420px 1fr; gap:22px;
+}
+.poster-shell{
+  background:linear-gradient(160deg, #f8fbff, #f2f5fb);
+  padding:18px; border-radius:18px; border:1px solid #e8edf5;
+}
+.poster-surface{
+  width:820px; height:1160px; margin:auto;
+  border-radius:18px; background:white; border:1px solid #e6eaf2;
+  box-shadow: 0 40px 80px rgba(3,7,18,.12); overflow:hidden; position:relative;
+}
