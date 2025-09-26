@@ -1,0 +1,28 @@
+scalar Date
+
+type UserLogin {
+    userId: ID!
+    username: String!
+    fullName: String
+    email: String
+    role: String!
+}
+
+type ResLoginDTO {
+    accessToken: String!
+    user: UserLogin!
+}
+
+input ReqLoginDTO {
+    username: String!
+    password: String!
+}
+
+type Query {
+    currentUser: UserLogin
+}
+
+type Mutation {
+    login(input: ReqLoginDTO!): ResLoginDTO!
+    getRefreshToken: ResLoginDTO!
+}
