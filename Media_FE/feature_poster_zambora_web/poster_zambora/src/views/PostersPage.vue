@@ -154,7 +154,7 @@ const formRecognition = reactive({
   template: "recognition",
   headline: "CÔNG TY CỔ PHẦN PHẦN MỀM",
   subheadline: "TÊN CÔNG TY",
-  name: "",
+  name: "TÊN NHÂN VIÊN",
   logo: defaultLogo,
   avatar: "",
   month: "1",
