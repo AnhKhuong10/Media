@@ -1,6 +1,7 @@
 package media.vn.module_album.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.JsonNode
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -13,6 +14,8 @@ import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
 import java.time.OffsetDateTime
 import jakarta.persistence.FetchType
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 
 @Entity
@@ -29,8 +32,10 @@ data class PhotoEntity(
     val url: String? = null,
     val filename: String? = null,
 
-    @Column(columnDefinition = "jsonb")
-    val metadata: String? = null,
+//    @Column(columnDefinition = "jsonb")
+//    val metadata: String? = null,
+    @JdbcTypeCode(SqlTypes.JSON) // <-- Hibernate 6 hỗ trợ trực tiếp
+    var metadata: JsonNode? = null,
 
     @Column(name = "deleted_at")
     val deletedAt: OffsetDateTime? = null,

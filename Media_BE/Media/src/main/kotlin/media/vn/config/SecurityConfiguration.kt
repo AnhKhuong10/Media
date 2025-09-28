@@ -34,7 +34,7 @@ class SecurityConfiguration(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         val whiteList = arrayOf(
-            "/graphql", "/graphiql"
+            "/graphql", "/graphiql","/photos/create", "/uploads/**"
         )
 
         http.csrf { it.disable() }

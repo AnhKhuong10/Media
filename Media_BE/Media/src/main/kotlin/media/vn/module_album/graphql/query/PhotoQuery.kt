@@ -17,4 +17,6 @@ class PhotoQuery (private val photoService: PhotoService) {
     fun getUserPhotos(@Argument userId: Long): List<PhotoDTO> {
         return photoService.getUserPhotos(userId)
     }
+
+
 }
