@@ -1,0 +1,54 @@
+
+################################## album
+type Photo {
+    id: ID!
+    url: String
+    filename: String
+    liked: Boolean
+    createdAt: String
+    isDeleted: Boolean
+}
+
+type Album {
+    id: ID!
+    name: String
+    createdAt: String
+    photos: [Photo!]!
+    sharedWith: [SharedAlbum!]!
+}
+
+type SharedAlbum {
+    id: ID!
+    sharedWith: ID!
+    permission: String
+}
+type AlbumPhoto {
+    id: ID!
+    albumId: ID!
+    photoId: ID!
+    position: Int
+}
+
+extend type Query {
+    getAlbum(albumId: ID!): Album
+    getUserAlbums(userId: ID!): [Album!]!
+    getPhoto(photoId: ID!): Photo
+    getUserPhotos(userId: ID!): [Photo!]!
+
+    listSharedAlbumsOfUser(userId: ID!): [SharedAlbum]
+    checkPermission(albumId: ID!, userId: ID!, required: String!): Boolean
+
+}
+
+
+extend type Mutation {
+    createAlbum(userId: ID!, name: String!): Album
+    updateAlbumName(albumId: ID!, userId: ID!, newName: String!): Album
+    deleteAlbum(albumId: ID!, userId: ID!): Boolean
+
+    addPhotoToAlbum(albumId: ID!, photoId: ID!, userId: ID!, position: Int): AlbumPhoto
+    removePhotoFromAlbum(albumPhotoId: ID!, userId: ID!): Boolean
+
+    shareAlbum(albumId: ID!, ownerId: ID!, sharedWith: ID!, permission: String!): SharedAlbum
+    revokeShare(albumId: ID!, ownerId: ID!, sharedWith: ID!): Boolean
+}

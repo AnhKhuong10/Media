@@ -13,5 +13,6 @@ class GraphQLConfig {
             builder.scalar(ExtendedScalars.Date) // map LocalDate
                 .scalar(ExtendedScalars.DateTime)  // map LocalDateTime
                 .scalar(ExtendedScalars.Time) // map LocalTime
+
         }
 }
