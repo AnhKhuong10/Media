@@ -1,16 +1,13 @@
 package media.vn.module_album.service.impl
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import media.vn.module_album.dto.PhotoDTO
 import media.vn.module_album.entity.PhotoEntity
 import media.vn.module_album.repository.PhotoRepository
 import media.vn.module_album.service.PhotoService
 import media.vn.module_album.service.UploadService
-import org.springframework.graphql.data.method.annotation.Argument
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
-import kotlin.toString
 
 @Service
 class PhotoServiceImpl(val photoRepository: PhotoRepository, val uploadService: UploadService) : PhotoService {

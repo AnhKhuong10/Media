@@ -12,9 +12,9 @@ import media.vn.module_album.repository.AlbumRepository
 import media.vn.module_album.repository.PhotoRepository
 import media.vn.module_album.repository.ShareAlbumRepository
 import media.vn.module_album.service.AlbumService
-import org.springframework.graphql.data.method.annotation.Argument
+import media.vn.utils.exception.BusinessException
+import media.vn.utils.exception.ErrorCode
 import org.springframework.stereotype.Service
-import kotlin.toString
 
 @Service
 class AlbumServiceImpl(
@@ -102,24 +102,25 @@ class AlbumServiceImpl(
 
     override fun deleteAlbum(albumId: Long, userId: Long) {
         val album = albumRepository.findById(albumId)
-            .orElseThrow { IllegalArgumentException("Album not found") }
-        if (album.userId != userId) throw IllegalAccessException("Không có quyền xoá album này")
+            .orElseThrow { BusinessException(ErrorCode.NOT_FOUND, "Album not found","không tìm thấy album") }
+        if (album.userId != userId) throw BusinessException(ErrorCode.FORBIDDEN, "Invalid share user","Không có quyền xoá album này")
         albumRepository.delete(album)
     }
 
     @Transactional
-    override fun addPhotoToAlbum(albumId: Long, photoId: Long, userId: Long, position: Int? ): AlbumPhotoEntity {
+    override fun addPhotoToAlbum(albumId: Long, photoId: Long, userId: Long, position: Int?): AlbumPhotoEntity {
         val album = albumRepository.findById(albumId)
-            .orElseThrow { IllegalArgumentException("Album not found") }
-        if (album.userId != userId) throw IllegalAccessException("Không có quyền thêm ảnh vào album này")
+            .orElseThrow { BusinessException(ErrorCode.NOT_FOUND, "Album not found","Không tìm thấy Album") }
+        if (album.userId != userId) throw BusinessException(ErrorCode.FORBIDDEN,"Invalid share user","Không có quyền thêm ảnh vào album này")
 
         val photo = photoRepository.findById(photoId)
-            .orElseThrow { IllegalArgumentException("Photo not found") }
+            .orElseThrow { BusinessException(ErrorCode.NOT_FOUND,"Photo not found","Không tìm thấy ảnh") }
         if (photo.userId != userId) throw IllegalAccessException("Không có quyền dùng photo này")
 
         val albumPhoto = AlbumPhotoEntity(album = album, photo = photo, position = position)
         return albumPhotoRepository.save(albumPhoto)
     }
+
     @Transactional
     override fun removePhotoFromAlbum(albumPhotoId: Long, userId: Long) {
         val albumPhoto = albumPhotoRepository.findById(albumPhotoId)
@@ -131,14 +132,20 @@ class AlbumServiceImpl(
         albumPhotoRepository.delete(albumPhoto)
     }
 
-     override fun shareAlbum(albumId: Long, ownerId: Long, sharedWithUserId: Long, permission: String): ShareAlbumEntity {
+    override fun shareAlbum(
+        albumId: Long,
+        ownerId: Long,
+        sharedWithUserId: Long,
+        permission: String
+    ): ShareAlbumEntity {
         val album = albumRepository.findById(albumId)
             .orElseThrow { IllegalArgumentException("Album not found") }
 
         if (album.userId != ownerId) throw IllegalAccessException("Không có quyền share album này")
 
-        val existing =  shareAlbumRepository.findByAlbumIdAndSharedWith(albumId, sharedWithUserId)
-        if (existing != null) {
+        val existing = shareAlbumRepository.findByAlbumIdAndSharedWith(albumId, sharedWithUserId)
+// /       if (existing != null) {  nếu đã có dữ liệu trong bản chia sẻ (đã chia sẻ) thì cập nhật lại quyền nếu như có thay đổi rồi update
+        if (existing.isNotEmpty()){
             val updated = existing[0].copy(permission = permission)
             return shareAlbumRepository.save(updated)
         }
@@ -163,7 +170,7 @@ class AlbumServiceImpl(
         return shareAlbumRepository.findBySharedWith(userId)
     }
 
-
+    //    cái này dùng để lọc hoặc chặn người dùng theo quyền truy cập album
     override fun checkPermission(albumId: Long, userId: Long, required: String): Boolean {
         val album = albumRepository.findById(albumId).orElse(null)
         if (album == null) return false
@@ -173,13 +180,14 @@ class AlbumServiceImpl(
 
         // share
         val share = shareAlbumRepository.findByAlbumIdAndSharedWith(albumId, userId)
-        if (share != null) {
+//        if (share != null) {
+        if (share.isNotEmpty()) {
+
             // ví dụ: "VIEW", "EDIT"
             return share[0].permission?.equals(required, ignoreCase = true) ?: false
         }
         return false
     }
-
 
 
 }////////////
