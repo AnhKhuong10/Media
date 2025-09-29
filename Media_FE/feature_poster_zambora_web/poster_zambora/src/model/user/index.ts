@@ -1,4 +1,4 @@
-import type { Role } from '@/model/role'
+import type { Role } from '../role'
 export type User = {
     userId: number; // BIGINT --> number
     username: string; // VARCHAR(255)
@@ -13,4 +13,7 @@ export type User = {
     createDate?: string; // TIMESTAMP - optional, use ISO string
     updateDate?: string; // TIMESTAMP - optional, use ISO string
     role: Role; // BIGINT - optional
+    //*** */
+    homeTown: string; // VARCHAR(255) - optional
+    photo?: string; // TEXT - optional
 };

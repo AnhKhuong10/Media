@@ -7,8 +7,8 @@
         alt="Zambora"
         style="position: absolute; top: 20px; left: 20px; width: 200px"
       />
-      <div class="headline">{{ form.headline }}</div>
-      <div class="branch">{{ form.subheadline }}</div>
+      <div class="headline">{{ form.title }}</div>
+      <div class="branch">{{ form.companyName }}</div>
     </div>
 
     <!-- Khung vàng + avatar bên trong -->
@@ -16,14 +16,14 @@
     <div class="medal">
       <!-- avatar lọt vòng -->
       <div class="medal-hole">
-        <img v-if="form.avatar" :src="form.avatar" class="medal-photo" />
+        <img v-if="form.avatar" :src="form.user.photo" class="medal-photo" />
         <div v-else class="medal-photo ph">Ảnh nhân viên</div>
       </div>
 
       <!-- ngôi sao ngay phía trên avatar -->
       <img :src="logoNgoiSao" alt="" class="medal-star" />
     </div>
-    <div class="title">{{ form.name }}</div>
+    <div class="title">{{ form.user.fullName }}</div>
 
     <div class="award">
       <div class="award-headline">
