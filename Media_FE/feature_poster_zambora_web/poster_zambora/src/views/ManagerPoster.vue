@@ -14,9 +14,18 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…" />
-      <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
-      <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label>
+      <input
+        v-model="q"
+        type="search"
+        class="input"
+        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
+      />
+      <label class="check"
+        ><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label
+      >
+      <label class="check"
+        ><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label
+      >
       <select v-model="styleFilter" class="select">
         <option value="">Tất cả style</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
@@ -28,21 +37,28 @@
       <table class="table">
         <thead>
           <tr>
+            <th>STT</th>
             <th>Poster ID</th>
             <th>Title</th>
             <th>Content</th>
             <th>Created at</th>
             <th>Created By</th>
             <th>Draft</th>
-            <th>User</th>
             <th>Style</th>
             <th></th>
           </tr>
         </thead>
 
         <tbody>
-          <poster v-for="p in paginated" :key="p.posterId" :poster="p" @view="onView" @edit="onEdit"
-            @delete="onDelete" />
+          <poster
+            v-for="(p, index) in paginated"
+            :key="p.posterId"
+            :poster="p"
+            :index="index + 1"
+            @view="onView"
+            @edit="onEdit"
+            @delete="onDelete"
+          />
           <tr v-if="paginated.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -52,102 +68,356 @@
 
     <!-- Pagination -->
     <footer class="pager">
-      <div class="muted">Hiển thị</div>
-      <select v-model.number="pageSize" class="select sm">
-        <option :value="5">5</option>
-        <option :value="10">10</option>
-        <option :value="20">20</option>
-      </select>
       <div class="spacer"></div>
       <button class="btn sm" :disabled="page === 1" @click="page = 1">«</button>
       <button class="btn sm" :disabled="page === 1" @click="page--">‹</button>
       <span class="muted">Trang {{ page }} / {{ totalPages }}</span>
       <button class="btn sm" :disabled="page === totalPages" @click="page++">›</button>
-      <button class="btn sm" :disabled="page === totalPages" @click="page = totalPages">»</button>
+      <button class="btn sm" :disabled="page === totalPages" @click="page = totalPages">
+        »
+      </button>
     </footer>
+
+    <poster-new-hire v-if="selectedPoster" :poster="selectedPoster" />
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import poster from '@/components/Poster.vue'
-import type { Poster } from '@/model/poster' // nếu chưa có, xem chú thích ở cuối
-
+import { ref, computed, reactive } from "vue";
+import poster from "@/components/Poster.vue";
+import posterNewHire from "@/components/PosterNewHire.vue";
+import type { Poster } from "@/model/poster"; // nếu chưa có, xem chú thích ở cuối
+import type { User } from "@/model/user"; // nếu chưa có, xem chú thích ở cuối
+import type { Role } from "@/model/role";
+const roleDemo: Role = {
+  roleId: 1, // Chỉ số vai trò (Role ID)
+  roleName: "Tester", // Tên vai trò
+};
+// demo user
+const userDemo: User = {
+  userId: 101,
+  username: "johndoe",
+  password: "password123",
+  phone: "0123456789",
+  email: "johndoe@example.com",
+  fullName: "John Doe",
+  refreshToken: "some_refresh_token_12345",
+  gender: "Male",
+  dob: "1990-01-01", // Ngày sinh (ISO format)
+  statusUser: "Active",
+  createDate: "2025-01-01T12:00:00Z", // ISO string cho ngày tạo
+  updateDate: "2025-01-10T12:00:00Z", // ISO string cho ngày cập nhật
+  role: roleDemo, // Gán role cho người dùng
+};
 // seed demo
 const posters: Poster[] = [
   {
-    posterId: 'p001', title: 'Chào mừng', content: 'Chào mừng bạn đến với công ty!', filePath: '/images/p001.png',
-    createdAt: '2025-09-01', updatedAt: '2025-09-02', createdBy: 'Admin', updatedBy: 'Admin',
-    isDraft: false, isDeleted: false, userId: 'u001', postStyleId: 'style01', photoId: 'photo001'
+    posterId: "p001",
+    title: "Chào mừng",
+    content: "Chào mừng bạn đến với công ty!",
+    filePath: "/images/p001.png",
+    createdAt: "2025-09-01",
+    updatedAt: "2025-09-02",
+    createdBy: "Admin",
+    updatedBy: "Admin",
+    isDraft: false,
+    isDeleted: false,
+    user: userDemo,
+    postStyleId: "new hire",
+    photoId: "photo001",
   },
   {
-    posterId: 'p002', title: 'Vinh danh', content: 'Vinh danh nhân viên xuất sắc tháng 9!', filePath: '/images/p002.png',
-    createdAt: '2025-09-05', updatedAt: '2025-09-06', createdBy: 'Manager1', updatedBy: 'Manager1',
-    isDraft: false, isDeleted: false, userId: 'u002', postStyleId: 'style02', photoId: 'photo002'
+    posterId: "p002",
+    title: "Vinh danh",
+    content: "Vinh danh nhân viên xuất sắc tháng 9!",
+    filePath: "/images/p002.png",
+    createdAt: "2025-09-05",
+    updatedAt: "2025-09-06",
+    createdBy: "Manager1",
+    updatedBy: "Manager1",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u002",
+    postStyleId: "style02",
+    photoId: "photo002",
   },
   {
-    posterId: 'p003', title: 'Thông báo', content: 'Thông báo nghỉ lễ 2/9', filePath: '/images/p003.png',
-    createdAt: '2025-08-28', updatedAt: '2025-08-30', createdBy: 'Hr', updatedBy: 'Hr',
-    isDraft: true, isDeleted: false, userId: 'u003', postStyleId: 'style03', photoId: 'photo003'
+    posterId: "p003",
+    title: "Thông báo",
+    content: "Thông báo nghỉ lễ 2/9",
+    filePath: "/images/p003.png",
+    createdAt: "2025-08-28",
+    updatedAt: "2025-08-30",
+    createdBy: "Hr",
+    updatedBy: "Hr",
+    isDraft: true,
+    isDeleted: false,
+    userId: "u003",
+    postStyleId: "style03",
+    photoId: "photo003",
   },
   {
-    posterId: 'p004', title: 'Tuyển dụng', content: 'Tuyển dụng thực tập sinh IT', filePath: '/images/p004.png',
-    createdAt: '2025-07-12', updatedAt: '2025-07-13', createdBy: 'Recruiter1', updatedBy: 'Recruiter2',
-    isDraft: false, isDeleted: true, userId: 'u004', postStyleId: 'style04', photoId: 'photo004'
+    posterId: "p004",
+    title: "Tuyển dụng",
+    content: "Tuyển dụng thực tập sinh IT",
+    filePath: "/images/p004.png",
+    createdAt: "2025-07-12",
+    updatedAt: "2025-07-13",
+    createdBy: "Recruiter1",
+    updatedBy: "Recruiter2",
+    isDraft: false,
+    isDeleted: true,
+    userId: "u004",
+    postStyleId: "style04",
+    photoId: "photo004",
   },
   {
-    posterId: 'p005', title: 'Chúc mừng sinh nhật', content: 'Chúc mừng sinh nhật các thành viên tháng 9!', filePath: '/images/p005.png',
-    createdAt: '2025-09-15', updatedAt: '2025-09-16', createdBy: 'Hr', updatedBy: 'Admin',
-    isDraft: false, isDeleted: false, userId: 'u005', postStyleId: 'style05', photoId: 'photo005'
+    posterId: "p005",
+    title: "Chúc mừng sinh nhật",
+    content: "Chúc mừng sinh nhật các thành viên tháng 9!",
+    filePath: "/images/p005.png",
+    createdAt: "2025-09-15",
+    updatedAt: "2025-09-16",
+    createdBy: "Hr",
+    updatedBy: "Admin",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u005",
+    postStyleId: "style05",
+    photoId: "photo005",
   },
-]
+  // 8 thêm bản ghi mới
+  {
+    posterId: "p006",
+    title: "Thông báo nghỉ lễ 30/4",
+    content: "Thông báo nghỉ lễ 30/4 và 1/5",
+    filePath: "/images/p006.png",
+    createdAt: "2025-04-25",
+    updatedAt: "2025-04-26",
+    createdBy: "Hr",
+    updatedBy: "Hr",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u006",
+    postStyleId: "style06",
+    photoId: "photo006",
+  },
+  {
+    posterId: "p007",
+    title: "Mở rộng đội ngũ IT",
+    content: "Tuyển dụng lập trình viên và kỹ sư phần mềm.",
+    filePath: "/images/p007.png",
+    createdAt: "2025-05-10",
+    updatedAt: "2025-05-11",
+    createdBy: "Recruiter2",
+    updatedBy: "Recruiter2",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u007",
+    postStyleId: "style07",
+    photoId: "photo007",
+  },
+  {
+    posterId: "p008",
+    title: "Chúc mừng ngày Quốc tế Phụ nữ",
+    content: "Chúc mừng các chị em nhân ngày Quốc tế Phụ nữ 8/3.",
+    filePath: "/images/p008.png",
+    createdAt: "2025-03-08",
+    updatedAt: "2025-03-09",
+    createdBy: "Admin",
+    updatedBy: "Admin",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u008",
+    postStyleId: "style08",
+    photoId: "photo008",
+  },
+  {
+    posterId: "p009",
+    title: "Thưởng tháng 13",
+    content: "Thông báo về chế độ thưởng tháng 13 cho toàn thể nhân viên.",
+    filePath: "/images/p009.png",
+    createdAt: "2025-12-10",
+    updatedAt: "2025-12-11",
+    createdBy: "Admin",
+    updatedBy: "Admin",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u009",
+    postStyleId: "style09",
+    photoId: "photo009",
+  },
+  {
+    posterId: "p010",
+    title: "Đào tạo nhân viên mới",
+    content: "Chương trình đào tạo nhân viên mới vào tháng 6/2025.",
+    filePath: "/images/p010.png",
+    createdAt: "2025-06-01",
+    updatedAt: "2025-06-02",
+    createdBy: "Hr",
+    updatedBy: "Hr",
+    isDraft: true,
+    isDeleted: false,
+    userId: "u010",
+    postStyleId: "style10",
+    photoId: "photo010",
+  },
+  {
+    posterId: "p011",
+    title: "Chính sách lương thưởng năm 2025",
+    content: "Cập nhật chính sách lương thưởng cho năm 2025.",
+    filePath: "/images/p011.png",
+    createdAt: "2025-01-01",
+    updatedAt: "2025-01-02",
+    createdBy: "Hr",
+    updatedBy: "Hr",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u011",
+    postStyleId: "style11",
+    photoId: "photo011",
+  },
+  {
+    posterId: "p012",
+    title: "Thông báo vắng mặt",
+    content: "Thông báo về việc vắng mặt của một số nhân viên trong tháng 7/2025.",
+    filePath: "/images/p012.png",
+    createdAt: "2025-07-05",
+    updatedAt: "2025-07-06",
+    createdBy: "Hr",
+    updatedBy: "Hr",
+    isDraft: false,
+    isDeleted: true,
+    userId: "u012",
+    postStyleId: "style12",
+    photoId: "photo012",
+  },
+  {
+    posterId: "p013",
+    title: "Chính sách bảo hiểm",
+    content: "Thông báo về chính sách bảo hiểm mới cho toàn thể nhân viên.",
+    filePath: "/images/p013.png",
+    createdAt: "2025-11-20",
+    updatedAt: "2025-11-21",
+    createdBy: "Admin",
+    updatedBy: "Admin",
+    isDraft: false,
+    isDeleted: false,
+    userId: "u013",
+    postStyleId: "style13",
+    photoId: "photo013",
+  },
+];
 
 // search & filters
-const q = ref('')
-const draftOnly = ref(false)
-const deletedOnly = ref(false)
-const styleFilter = ref<string>('')
+const q = ref("");
+const draftOnly = ref(false);
+const deletedOnly = ref(false);
+const styleFilter = ref<string>("");
 
-const styleOptions = Array.from(new Set(posters.map(p => p.postStyleId)))
+const styleOptions = Array.from(new Set(posters.map((p) => p.postStyleId)));
 
 const filtered = computed(() => {
-  const kw = q.value.trim().toLowerCase()
-  return posters.filter(p => {
-    if (draftOnly.value && !p.isDraft) return false
-    if (deletedOnly.value && !p.isDeleted) return false
-    if (styleFilter.value && p.postStyleId !== styleFilter.value) return false
-    if (!kw) return true
+  const kw = q.value.trim().toLowerCase();
+  return posters.filter((p) => {
+    if (draftOnly.value && !p.isDraft) return false;
+    if (deletedOnly.value && !p.isDeleted) return false;
+    if (styleFilter.value && p.postStyleId !== styleFilter.value) return false;
+    if (!kw) return true;
     return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.userId, p.photoId]
-      .join(' ').toLowerCase().includes(kw)
-  })
-})
+      .join(" ")
+      .toLowerCase()
+      .includes(kw);
+  });
+});
 
 // pagination
-const page = ref(1)
-const pageSize = ref(10)
-const total = computed(() => filtered.value.length)
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
+const page = ref(1);
+const pageSize = ref(13);
+const total = computed(() => filtered.value.length);
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
 const paginated = computed(() => {
-  if (page.value > totalPages.value) page.value = totalPages.value
-  const start = (page.value - 1) * pageSize.value
-  return filtered.value.slice(start, start + pageSize.value)
-})
+  if (page.value > totalPages.value) page.value = totalPages.value;
+  const start = (page.value - 1) * pageSize.value;
+  return filtered.value.slice(start, start + pageSize.value);
+});
 
 // actions (stub)
-function onCreate() { alert('Mở form tạo mới') }
-function onView(p: Poster) { alert(`Xem ${p.posterId}`) }
-function onEdit(p: Poster) { alert(`Sửa ${p.posterId}`) }
-function onDelete(p: Poster) { alert(`Xóa ${p.posterId}`) }
+function onCreate() {
+  alert("Mở form tạo mới");
+}
+const formNewHire = reactive({
+  template: "new-hire",
+  headline: "CHÀO MỪNG BẠN ĐẾN VỚI",
+  subheadline: "TÊN CÔNG TY",
+  name: "TÊN NHÂN VIÊN",
+  role: "VỊ TRÍ CÔNG VIỆC",
+  yob: "NĂM SINH",
+  hometown: "QUÊ QUÁN",
+  logo: "/assets/image-poster-banner/photo-test.png",
+  avatar: "",
+  primary: "#1d4ed8",
+});
+
+// Khai báo selectedPoster là reactive object
+const selectedPoster = reactive({});  // empty object
+
+// Hàm onView sẽ gán formNewHire vào selectedPoster
+function onView(p: Poster) {
+  // Gán toàn bộ dữ liệu formNewHire vào selectedPoster
+  Object.assign(selectedPoster, formNewHire);
+  console.log(selectedPoster);  // Kiểm tra giá trị đã gán
+}
+function onEdit(p: Poster) {
+  alert(`Sửa ${p.posterId}`);
+}
+function onDelete(p: Poster) {
+  alert(`Xóa ${p.posterId}`);
+}
 
 // csv
 function exportCsv() {
   const rows = [
-    ['posterId', 'title', 'content', 'filePath', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'isDraft', 'isDeleted', 'userId', 'postStyleId', 'photoId'],
-    ...filtered.value.map(p => [p.posterId, p.title, p.content, p.filePath, p.createdAt, p.updatedAt, p.createdBy, p.updatedBy, p.isDraft, p.isDeleted, p.userId, p.postStyleId, p.photoId])
-  ]
-  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n')
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
-  const a = document.createElement('a'); a.href = url; a.download = 'posters.csv'; a.click(); URL.revokeObjectURL(url)
+    [
+      "posterId",
+      "title",
+      "content",
+      "filePath",
+      "createdAt",
+      "updatedAt",
+      "createdBy",
+      "updatedBy",
+      "isDraft",
+      "isDeleted",
+      "userId",
+      "postStyleId",
+      "photoId",
+    ],
+    ...filtered.value.map((p) => [
+      p.posterId,
+      p.title,
+      p.content,
+      p.filePath,
+      p.createdAt,
+      p.updatedAt,
+      p.createdBy,
+      p.updatedBy,
+      p.isDraft,
+      p.isDeleted,
+      p.userId,
+      p.postStyleId,
+      p.photoId,
+    ]),
+  ];
+  const csv = rows
+    .map((r) => r.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(","))
+    .join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "posters.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
 
@@ -178,6 +448,7 @@ function exportCsv() {
 .muted {
   color: #6b7280;
   font-size: 13px;
+  font-weight: bold;
 }
 
 /* Buttons: đơn giản */
@@ -259,7 +530,7 @@ function exportCsv() {
   text-align: left;
   font-weight: bold;
   padding: 10px 12px;
-  color: #111
+  color: #111;
 }
 
 .table tbody td {
@@ -284,12 +555,20 @@ function exportCsv() {
 /* Cột rộng hẹp hợp lý */
 .table th:nth-child(1),
 .table td:nth-child(1) {
+  width: 50px;
+}
+.table th:nth-child(2),
+.table td:nth-child(2) {
   width: 90px;
+}
+.table th:nth-child(3),
+.table td:nth-child(4) {
+  width: 200px;
 }
 
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 130px;
+  width: 400px;
 }
 
 .table th:nth-child(5),
@@ -344,7 +623,7 @@ function exportCsv() {
 }
 
 .pager .spacer {
-  flex: 1;
+  display: f;
 }
 
 .select.sm {
@@ -402,5 +681,4 @@ function exportCsv() {
   font-size: 14px;
   /* chữ vừa */
 }
-
 </style>
