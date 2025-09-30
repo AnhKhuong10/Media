@@ -1,4 +1,4 @@
-import type { User } from "../model/user";
+import type { User } from "../user";
 export type Poster = {
     posterId: string;
     title: string;
@@ -12,6 +12,7 @@ export type Poster = {
     isDeleted: boolean;
     user: User;
     postStyleId: string;
+    photoId?: string;
     //photoId: string;
     //*****/
     companyName: string;

@@ -4,18 +4,18 @@
       <img :src="form.logo" alt="Zambora" style="position: absolute; top: 20px; left: 20px; width: 180px" />
       <div class="headline">{{ form.title }}</div>
       <div class="headline">{{ form.companyName }}</div>
-      <img src="@/assets/image-poster-banner/gold-stroke.png" alt="gold stroke" class="gold-stroke" />
+      <img src="@/assets/image-poster-banner/gold-stroke.jpg" alt="gold stroke" class="gold-stroke" />
     </div>
     <div style="display: flex; justify-content: center; margin-top: -250px">
-      <img v-if="form.avatar" :src="form.avatar" class="photo" />
+      <img v-if="form.user.photo" :src="form.user.photo" class="photo" />
       <div v-else class="photo ph">Ảnh nhân viên</div>
     </div>
 
     <div class="info">
       <div class="name">{{ form.user.fullName }}</div>
-      <!-- <div class="role">Vị trí: {{ form.user.role.roleName }}</div> -->
+      <div class="role">Vị trí: {{ form.user.role?.roleName || 'Chưa có' }}</div>
       <div class="meta">
-        Năm sinh: {{ form.user.dob }}
+        Năm sinh: {{ formatDate(form.user.dob) }}
         <br />
         Quê quán: {{ form.user.homeTown }}
       </div>
@@ -26,6 +26,18 @@
 
 <script setup>
 defineProps({ form: Object });
+function formatDate(date) {
+  if (!date) {
+    return ''; // Trả về chuỗi rỗng nếu date là undefined hoặc null
+  }
+
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
 </script>
 
 <style scoped>

@@ -10,38 +10,65 @@
       <div class="stage">
         <!-- Panel trái: Form gọn, có group -->
         <div class="card">
-          <div class="field">
-            <label>Chọn người dùng</label>
-            <div class="select-container">
-              <button @click="showModal = true" class="btn">+</button> <!-- Mở Modal -->
-            </div>
-          </div>
           <div class="card-hd">Cấu hình</div>
           <div class="card-bd">
             <div class="field">
-              <label>Loại Poster</label>
-              <select class="select" v-model="activeTemplate">
-                <option value="new-hire">Nhân viên mới</option>
-                <option value="recognition">Vinh danh</option>
-              </select>
+              <div class="horizontal">
+                <label>Loại Poster</label>
+                <select class="select" v-model="activeTemplate" style="width: 50%;">
+                  <option value="1">Nhân viên mới</option>
+                  <option value="2">Vinh danh</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <div class="horizontal">
+                <label>Chọn nhân viên</label>
+                <div class="select-container">
+                  <button @click="showModal = true" class="btn">
+                    <i class="pi pi-user"></i> <!-- Icon nhân viên -->
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="horizontal">
+                <label>Chọn ảnh đại diện</label>
+                <div class="select-container">
+                  <button @click="triggerFileUpload" class="btn">
+                    <i class="pi pi-upload"></i> <!-- Icon upload -->
+                  </button>
+                </div>
+                <input type="file" id="fileInput" @change="handleFileUpload" style="display: none;" />
+              </div>
+            </div>
+            <!-- Checkbox: Chọn ảnh từ nhân viên -->
+            <div class="field">
+              <div class="horizontal">
+                <label>Chọn ảnh từ nhân viên</label>
+                <input type="radio" v-model="photoSource" value="default" /> <!-- Chọn ảnh từ nhân viên -->
+              </div>
             </div>
 
+            <!-- Checkbox: Chọn ảnh từ máy -->
+            <div class="field">
+              <div class="horizontal">
+                <label>Chọn ảnh từ máy</label>
+                <input type="radio" v-model="photoSource" value="uploaded" /> <!-- Chọn ảnh từ máy -->
+              </div>
+            </div>
             <div class="grid-2">
               <div class="field">
                 <label>Tiêu đề</label>
                 <input class="input" v-model="activeForm.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" />
               </div>
               <div class="field">
-                <label>Thương hiệu</label>
+                <label>Tên công ty</label>
                 <input class="input" v-model="activeForm.companyName" placeholder="REVOTECH" />
               </div>
             </div>
 
             <div class="grid-2">
-              <div class="field">
-                <label>Họ tên</label>
-                <input class="input" v-model="activeForm.user.fullName" placeholder="Họ tên" />
-              </div>
               <div class="field" v-if="activeTemplate === 'new-hire'">
                 <label>Chức danh</label>
                 <input class="input" v-model="activeForm.user.role" placeholder="Chức danh" />
@@ -71,33 +98,6 @@
                 <input class="input" v-model="activeForm.year" placeholder="2025" />
               </div>
             </div>
-
-            <!-- Upload -->
-            <div class="grid-2">
-              <div class="field">
-                <input id="avatarInput" type="file" accept="image/*" style="display: none"
-                  @change="onFile('avatar', $event)" />
-                <table class="upload-table">
-                  <tbody>
-                    <tr>
-                      <td><label for="avatarInput">Ảnh nhân viên</label></td>
-                      <td>
-                        <div class="upload-wrap">
-                          <a href="javascript:void(0)" class="upload-btn">
-                            <i class="pi pi-plus"></i>
-                          </a>
-                          <ul class="dropdown">
-                            <li @click="">Chọn từ album</li>
-                            <li @click="triggerDeviceUpload">Chọn từ máy</li>
-                          </ul>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <!-- End upload -->
           </div>
         </div>
 
@@ -110,34 +110,55 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal chọn user -->
   <div v-if="showModal" class="modal-backdrop" @click="showModal = false">
     <div class="modal" @click.stop>
       <div class="modal-hd">
-        <h3>Chọn người dùng</h3>
         <button @click="showModal = false" class="btn-red">Đóng</button>
       </div>
-      <div class="modal-grid">
-        <table>
-          <thead>
-            <tr>
-              <th>Tên</th>
-              <th>Chức danh</th>
-              <th>Chọn</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in usersDemo" :key="user.userId">
-              <td>{{ user.fullName }}</td>
-              <td>{{ user.role.roleName }}</td>
-              <td>
-                <button @click="selectUser(user)">Chọn</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="modal-body">
+        <!-- Thanh tìm kiếm -->
+        <div class="horizontal">
+          <input type="text" v-model="searchQuery" placeholder="Tìm kiếm theo tên..." class="search-bar" />
+          <div class="sort-buttons">
+            <button @click="sortByDateAscending">Ngày vào nhỏ -> lớn</button>
+            <button @click="sortByDateDescending">Ngày vào lớn -> nhỏ</button>
+          </div>
+        </div>
+        <!-- Bảng người dùng -->
+        <div class="modal-grid">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tên</th>
+                <th>Email</th>
+                <th>Ngày sinh</th>
+                <th>Quê quán</th>
+                <th>Vị trí</th>
+                <th>Ngày vào</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="user in filteredUsers" :key="user.userId">
+                <td>{{ user.fullName }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.dob }}</td>
+                <td>{{ user.homeTown }}</td>
+                <td>{{ user.role.roleName }}</td>
+                <td>{{ formatDate(user.createDate) }}</td>
+                <td>
+                  <button @click="selectUser(user)">Chọn</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -148,6 +169,32 @@ import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
 import type { Role } from "../model/role";
+
+const searchQuery = ref("");
+const filteredUsers = computed(() => {
+  return usersDemo.filter((user) =>
+    user.fullName && user.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+// Sắp xếp từ ngày bé đến ngày to
+function sortByDateAscending() {
+  // Sắp xếp trực tiếp trên mảng `usersDemo`
+  usersDemo.sort((a, b) => {
+    const dateA = new Date(a.createDate).getTime();
+    const dateB = new Date(b.createDate).getTime();
+    return dateA - dateB;
+  });
+}
+
+// Sắp xếp từ ngày to đến ngày bé (giảm dần)
+function sortByDateDescending() {
+  // Sắp xếp trực tiếp trên mảng `usersDemo`
+  usersDemo.sort((a, b) => {
+    const dateA = new Date(a.createDate).getTime();
+    const dateB = new Date(b.createDate).getTime();
+    return dateB - dateA;
+  });
+}
 
 const showModal = ref(false);
 function selectUser(user: User) {
@@ -174,11 +221,7 @@ const formRecognition = reactive({
   year: "",
 });
 
-const roleDemo: Role = {
-  roleId: 1,
-  roleName: "HR",
-}
-const usersDemo: User[] = [
+const usersDemo = reactive([
   {
     userId: 1,
     username: "user1",
@@ -192,8 +235,11 @@ const usersDemo: User[] = [
     createDate: "2024-01-01T00:00:00Z",
     updateDate: "2024-01-01T00:00:00Z",
     homeTown: "Hà Nội",
-    role: roleDemo,
-    photo: "@/assets/image-poster-banner/photo-demo.jpg",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
   },
   {
     userId: 2,
@@ -205,11 +251,14 @@ const usersDemo: User[] = [
     gender: "Female",
     dob: "1992-02-02",
     statusUser: "Active",
-    createDate: "2024-01-01T00:00:00Z",
-    updateDate: "2024-01-01T00:00:00Z",
+    createDate: "2023-12-15T00:00:00Z",
+    updateDate: "2023-12-15T00:00:00Z",
     homeTown: "Hà Nội",
-    role: roleDemo,
-    photo: "@/assets/image-poster-banner/photo-demo.jpg",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
   },
   {
     userId: 3,
@@ -221,12 +270,14 @@ const usersDemo: User[] = [
     gender: "Male",
     dob: "1994-03-03",
     statusUser: "Inactive",
-    createDate: "2024-01-01T00:00:00Z",
-    updateDate: "2024-01-01T00:00:00Z",
+    createDate: "2023-11-25T00:00:00Z",
+    updateDate: "2023-11-25T00:00:00Z",
     homeTown: "Hà Nội",
-    role: roleDemo,
-    photo: "@/assets/image-poster-banner/photo-demo.jpg",
-
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
   },
   {
     userId: 4,
@@ -238,11 +289,14 @@ const usersDemo: User[] = [
     gender: "Female",
     dob: "1996-04-04",
     statusUser: "Active",
-    createDate: "2024-01-01T00:00:00Z",
-    updateDate: "2024-01-01T00:00:00Z",
+    createDate: "2023-10-10T00:00:00Z",
+    updateDate: "2023-10-10T00:00:00Z",
     homeTown: "Hà Nội",
-    photo: "@/assets/image-poster-banner/photo-demo.jpg",
-    role: roleDemo,
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
   },
   {
     userId: 5,
@@ -254,14 +308,111 @@ const usersDemo: User[] = [
     gender: "Male",
     dob: "1998-05-05",
     statusUser: "Active",
-    createDate: "2024-01-01T00:00:00Z",
-    updateDate: "2024-01-01T00:00:00Z",
+    createDate: "2023-09-22T00:00:00Z",
+    updateDate: "2023-09-22T00:00:00Z",
     homeTown: "Hà Nội",
-    photo: "@/assets/image-poster-banner/photo-demo.jpg",
-    role: roleDemo,
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
   },
-];
-
+  {
+    userId: 6,
+    username: "user6",
+    password: "password6",
+    phone: "0701234567",
+    email: "user6@example.com",
+    fullName: "Tran Thi F",
+    gender: "Female",
+    dob: "1995-06-12",
+    statusUser: "Active",
+    createDate: "2024-06-01T00:00:00Z",
+    updateDate: "2024-06-01T00:00:00Z",
+    homeTown: "Hà Nội",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+  },
+  {
+    userId: 7,
+    username: "user7",
+    password: "password7",
+    phone: "0712345678",
+    email: "user7@example.com",
+    fullName: "Le Minh G",
+    gender: "Male",
+    dob: "1993-11-22",
+    statusUser: "Inactive",
+    createDate: "2024-02-20T00:00:00Z",
+    updateDate: "2024-02-20T00:00:00Z",
+    homeTown: "Hà Nội",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+  },
+  {
+    userId: 8,
+    username: "user8",
+    password: "password8",
+    phone: "0823456789",
+    email: "user8@example.com",
+    fullName: "Nguyen Thi H",
+    gender: "Female",
+    dob: "1997-07-16",
+    statusUser: "Active",
+    createDate: "2024-04-11T00:00:00Z",
+    updateDate: "2024-04-11T00:00:00Z",
+    homeTown: "Hà Nội",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+  },
+  {
+    userId: 9,
+    username: "user9",
+    password: "password9",
+    phone: "0934567890",
+    email: "user9@example.com",
+    fullName: "Pham Minh I",
+    gender: "Male",
+    dob: "1999-09-09",
+    statusUser: "Active",
+    createDate: "2024-01-15T00:00:00Z",
+    updateDate: "2024-01-15T00:00:00Z",
+    homeTown: "Hà Nội",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+  },
+  {
+    userId: 10,
+    username: "user10",
+    password: "password10",
+    phone: "0945678901",
+    email: "user10@example.com",
+    fullName: "Nguyen Thi J",
+    gender: "Female",
+    dob: "2000-02-22",
+    statusUser: "Inactive",
+    createDate: "2024-03-25T00:00:00Z",
+    updateDate: "2024-03-25T00:00:00Z",
+    homeTown: "Hà Nội",
+    role: {
+      roleId: 1,
+      roleName: "HR"
+    },
+    photo: "/src/assets/image-poster-banner/photo-test.png",
+  },
+]);
 const activeTemplate = ref("1");
 
 const activeForm = computed(() =>
@@ -271,25 +422,40 @@ const activeForm = computed(() =>
 const currentPoster = computed(() =>
   activeTemplate.value === "1" ? PosterNewHire : PosterRecognition
 );
+function triggerFileUpload() {
+  document.getElementById('fileInput')?.click(); // Gọi click cho input file ẩn
+}
+// Phương thức để chọn ảnh từ máy
+function handleFileUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Cập nhật ảnh vào form
+      activeForm.value.user.photo = reader.result as string;
+    };
+    reader.readAsDataURL(file); // Đọc file dưới dạng Base64
+  }
+}
 
-function triggerDeviceUpload() {
-  document.getElementById("avatarInput")?.click();
-}
-function onFile(key: string, e: Event): void {
-  const f = (e.target as HTMLInputElement).files?.[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    (activeForm.value as any)[key] = reader.result;  // Gán kết quả vào activeForm
-  };
-  reader.readAsDataURL(f);
-}
 function saveDraft() {
   localStorage.setItem(
     `poster-draft-${activeTemplate.value}`,
     JSON.stringify(activeForm.value)
   );
   alert("Đã lưu nháp!");
+}
+function formatDate(date: string | undefined) {
+  if (!date) {
+    return ''; // Trả về chuỗi rỗng nếu date là undefined hoặc null
+  }
+
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
 }
 async function exportPng() {
   // Kiểm tra xem phần tử có tồn tại hay không
@@ -312,6 +478,10 @@ async function exportPng() {
 <style scoped>
 .field table {
   border-collapse: collapse;
+}
+
+.field label {
+  padding-top: 10px;
 }
 
 .field table td {
@@ -393,9 +563,9 @@ async function exportPng() {
 }
 
 .modal {
-  width: min(90vw, 760px);
-  background: #0b1220;
-  color: #e5e7eb;
+  width: min(90vw, 930px);
+  background: #fff;
+  color: black;
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 20px 60px rgba(2, 6, 23, 0.45);
@@ -405,6 +575,7 @@ async function exportPng() {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 12px;
+  margin-left: 800px;
 }
 
 .modal-grid {
@@ -447,5 +618,127 @@ async function exportPng() {
 .btn-red:hover {
   background-color: #b91c1c;
   /* đỏ đậm khi hover */
+}
+
+.horizontal {
+  display: flex;
+  flex-direction: row;
+  /* Change this to row */
+  gap: 6px;
+}
+
+/* Cải thiện kiểu bảng */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  /* Đảm bảo các cột có độ rộng cố định */
+}
+
+.table th,
+.table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ccc;
+}
+
+.table th {
+  background-color: #f2f2f2;
+}
+
+/* Chỉnh sửa độ rộng các cột */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 150px;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 200px;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 120px;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 100px;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 80px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 120px;
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 80px;
+}
+
+/* Tăng chiều rộng cho button nếu cần */
+.table button {
+  padding: 5px 10px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.table button:hover {
+  background-color: #1d4ed8;
+}
+
+.search-bar {
+  width: 20%;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  /* Đảm bảo padding không làm bảng bị lệch */
+  font-size: 13px;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #2563eb;
+  /* xanh giống màu nút */
+  box-shadow: 0 0 4px rgba(37, 99, 235, 0.5);
+}
+
+.sort-buttons {
+  margin-bottom: 20px;
+}
+
+.sort-buttons button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.sort-buttons button:hover {
+  background-color: #1d4ed8;
+}
+
+.file-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  /* Tăng kích thước icon */
+  color: #1d4ed8;
+  /* Màu của icon */
 }
 </style>

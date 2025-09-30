@@ -84,11 +84,11 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
-import poster from "@/components/Poster.vue";
-import posterNewHire from "@/components/PosterNewHire.vue";
-import type { Poster } from "@/model/poster"; // nếu chưa có, xem chú thích ở cuối
-import type { User } from "@/model/user"; // nếu chưa có, xem chú thích ở cuối
-import type { Role } from "@/model/role";
+import poster from "../components/Poster.vue";
+import posterNewHire from "../components/PosterNewHire.vue";
+import type { Poster } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
+import type { User } from "../model/user"; // nếu chưa có, xem chú thích ở cuối
+import type { Role } from "../model/role";
 const roleDemo: Role = {
   roleId: 1, // Chỉ số vai trò (Role ID)
   roleName: "Tester", // Tên vai trò
@@ -108,6 +108,7 @@ const userDemo: User = {
   createDate: "2025-01-01T12:00:00Z", // ISO string cho ngày tạo
   updateDate: "2025-01-10T12:00:00Z", // ISO string cho ngày cập nhật
   role: roleDemo, // Gán role cho người dùng
+  homeTown: "Hà Nội",
 };
 // seed demo
 const posters: Poster[] = [
@@ -125,6 +126,9 @@ const posters: Poster[] = [
     user: userDemo,
     postStyleId: "new hire",
     photoId: "photo001",
+        companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p002",
@@ -137,9 +141,12 @@ const posters: Poster[] = [
     updatedBy: "Manager1",
     isDraft: false,
     isDeleted: false,
-    userId: "u002",
+    user: userDemo,
     postStyleId: "style02",
     photoId: "photo002",
+        companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p003",
@@ -152,9 +159,12 @@ const posters: Poster[] = [
     updatedBy: "Hr",
     isDraft: true,
     isDeleted: false,
-    userId: "u003",
+    user: userDemo,
     postStyleId: "style03",
     photoId: "photo003",
+            companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p004",
@@ -167,9 +177,12 @@ const posters: Poster[] = [
     updatedBy: "Recruiter2",
     isDraft: false,
     isDeleted: true,
-    userId: "u004",
+    user: userDemo,
     postStyleId: "style04",
     photoId: "photo004",
+            companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p005",
@@ -182,9 +195,12 @@ const posters: Poster[] = [
     updatedBy: "Admin",
     isDraft: false,
     isDeleted: false,
-    userId: "u005",
+    user: userDemo,
     postStyleId: "style05",
     photoId: "photo005",
+            companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   // 8 thêm bản ghi mới
   {
@@ -198,9 +214,12 @@ const posters: Poster[] = [
     updatedBy: "Hr",
     isDraft: false,
     isDeleted: false,
-    userId: "u006",
+    user: userDemo,
     postStyleId: "style06",
     photoId: "photo006",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p007",
@@ -213,9 +232,12 @@ const posters: Poster[] = [
     updatedBy: "Recruiter2",
     isDraft: false,
     isDeleted: false,
-    userId: "u007",
+    user: userDemo,
     postStyleId: "style07",
     photoId: "photo007",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p008",
@@ -228,9 +250,12 @@ const posters: Poster[] = [
     updatedBy: "Admin",
     isDraft: false,
     isDeleted: false,
-    userId: "u008",
+    user: userDemo,
     postStyleId: "style08",
     photoId: "photo008",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p009",
@@ -243,9 +268,12 @@ const posters: Poster[] = [
     updatedBy: "Admin",
     isDraft: false,
     isDeleted: false,
-    userId: "u009",
+    user: userDemo,
     postStyleId: "style09",
     photoId: "photo009",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p010",
@@ -258,9 +286,12 @@ const posters: Poster[] = [
     updatedBy: "Hr",
     isDraft: true,
     isDeleted: false,
-    userId: "u010",
+    user: userDemo,
     postStyleId: "style10",
     photoId: "photo010",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p011",
@@ -273,9 +304,12 @@ const posters: Poster[] = [
     updatedBy: "Hr",
     isDraft: false,
     isDeleted: false,
-    userId: "u011",
+    user: userDemo,
     postStyleId: "style11",
     photoId: "photo011",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p012",
@@ -288,9 +322,12 @@ const posters: Poster[] = [
     updatedBy: "Hr",
     isDraft: false,
     isDeleted: true,
-    userId: "u012",
+    user: userDemo,
     postStyleId: "style12",
     photoId: "photo012",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
   {
     posterId: "p013",
@@ -303,9 +340,12 @@ const posters: Poster[] = [
     updatedBy: "Admin",
     isDraft: false,
     isDeleted: false,
-    userId: "u013",
+    user: userDemo,
     postStyleId: "style13",
     photoId: "photo013",
+                companyName: "Công ty XYZ",
+    month: "09",  // tháng
+    year: "2025",  // năm
   },
 ];
 
@@ -324,7 +364,7 @@ const filtered = computed(() => {
     if (deletedOnly.value && !p.isDeleted) return false;
     if (styleFilter.value && p.postStyleId !== styleFilter.value) return false;
     if (!kw) return true;
-    return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.userId, p.photoId]
+    return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.user, p.photoId]
       .join(" ")
       .toLowerCase()
       .includes(kw);
