@@ -57,45 +57,15 @@
                 <input type="radio" v-model="photoSource" value="uploaded" /> <!-- Chọn ảnh từ máy -->
               </div>
             </div>
+
             <div class="grid-2">
               <div class="field">
                 <label>Tiêu đề</label>
-                <input class="input" v-model="activeForm.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" />
+                <input class="input" v-model="poster.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" />
               </div>
               <div class="field">
                 <label>Tên công ty</label>
-                <input class="input" v-model="activeForm.companyName" placeholder="REVOTECH" />
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="field" v-if="activeTemplate === 'new-hire'">
-                <label>Chức danh</label>
-                <input class="input" v-model="activeForm.user.role" placeholder="Chức danh" />
-              </div>
-            </div>
-
-            <!-- new-hire -->
-            <div class="grid-2" v-if="activeTemplate === 'new-hire'">
-              <div class="field">
-                <label>Năm sinh</label>
-                <input class="input" v-model="activeForm.user.dob" placeholder="1999" />
-              </div>
-              <div class="field">
-                <label>Quê quán</label>
-                <input class="input" v-model="activeForm.user.homeTown" placeholder="Hà Nội" />
-              </div>
-            </div>
-
-            <!-- recognition -->
-            <div class="grid-2" v-if="activeTemplate === 'recognition'">
-              <div class="field">
-                <label>Tháng</label>
-                <input class="input" v-model="activeForm.month" placeholder="5" />
-              </div>
-              <div class="field">
-                <label>Năm</label>
-                <input class="input" v-model="activeForm.year" placeholder="2025" />
+                <input class="input" v-model="poster.companyName" placeholder="REVOTECH" />
               </div>
             </div>
           </div>
@@ -104,7 +74,7 @@
         <!-- Panel phải: Stage poster -->
         <div class="poster-shell">
           <div class="poster-surface" id="exportTarget">
-            <component :is="currentPoster" :form="activeForm" :key="activeTemplate" />
+            <component :is="currentPoster" :form="poster" :key="activeTemplate" />
           </div>
         </div>
       </div>
@@ -162,13 +132,40 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from "vue";
+import { reactive, ref, computed, watch } from "vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
-import type { Role } from "../model/role";
+
+const photoSource = ref<'default' | 'uploaded'>('default');
+const uploadedPhoto = ref<string | null>(null);
+
+// Thay vì computed từ form.user.photo, dùng ref ổn định:
+const employeePhoto = ref<string>(defaultLogo);
+watch(photoSource, (val, oldVal) => {
+  console.log('[photoSource] change:', oldVal, '→', val);
+  ensureUser();
+
+  if (val === 'uploaded') {
+    if (uploadedPhoto.value) {
+      console.log('[apply] use uploadedPhoto =', uploadedPhoto.value.slice(0, 40));
+      poster.user.photo = uploadedPhoto.value;
+    } else {
+      console.log('[apply] chưa có uploadedPhoto, giữ nguyên');
+    }
+  } else {
+    console.log('[apply] use employeePhoto =', employeePhoto.value.slice(0, 40));
+    poster.user.photo = employeePhoto.value;
+  }
+  console.log('[result] form.user.photo =', poster.user.photo?.slice?.(0, 40));
+});
+function ensureUser() {
+  if (!poster.user) {
+    poster.user = {} as User;
+  }
+}
 
 const searchQuery = ref("");
 const filteredUsers = computed(() => {
@@ -198,27 +195,25 @@ function sortByDateDescending() {
 
 const showModal = ref(false);
 function selectUser(user: User) {
-  activeForm.value.user = user; // Cập nhật user trong form
-  showModal.value = false; // Đóng modal sau khi chọn
+  poster.user = user;
+  // Lấy ảnh gốc của nhân viên, lưu vào biến riêng
+  employeePhoto.value = user.photo || defaultLogo;
+
+  // Đồng bộ ảnh hiển thị theo radio hiện tại
+  if (photoSource.value === 'default') {
+    poster.user.photo = employeePhoto.value;
+  } else {
+    poster.user.photo = uploadedPhoto.value ?? employeePhoto.value;
+  }
+  showModal.value = false;
 }
 
-const formNewHire = reactive({
+const poster = reactive({
   postStyleId: "1",
   title: "CHÀO MỪNG BẠN ĐẾN VỚI",
   companyName: "TÊN CÔNG TY",
   user: {} as User,
   logo: defaultLogo,
-  month: "",
-  year: "",
-});
-const formRecognition = reactive({
-  postStyleId: "2",
-  title: "CÔNG TY CỔ PHẦN PHẦN MỀM",
-  companyName: "TÊN CÔNG TY",
-  user: {} as User,
-  logo: defaultLogo,
-  month: "",
-  year: "",
 });
 
 const usersDemo = reactive([
@@ -415,10 +410,6 @@ const usersDemo = reactive([
 ]);
 const activeTemplate = ref("1");
 
-const activeForm = computed(() =>
-  activeTemplate.value === "1" ? formNewHire : formRecognition
-);
-
 const currentPoster = computed(() =>
   activeTemplate.value === "1" ? PosterNewHire : PosterRecognition
 );
@@ -426,22 +417,42 @@ function triggerFileUpload() {
   document.getElementById('fileInput')?.click(); // Gọi click cho input file ẩn
 }
 // Phương thức để chọn ảnh từ máy
-function handleFileUpload(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      // Cập nhật ảnh vào form
-      activeForm.value.user.photo = reader.result as string;
-    };
-    reader.readAsDataURL(file); // Đọc file dưới dạng Base64
+function handleFileUpload(e: Event) {
+  const input = e.currentTarget as HTMLInputElement | null;
+  const file = input?.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('Vui lòng chọn file ảnh hợp lệ.');
+    if (input) input.value = '';
+    return;
   }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    // 1) LƯU RIÊNG ẢNH UPLOAD
+    uploadedPhoto.value = reader.result as string;
+
+    // 2) Nếu đang chọn nguồn "uploaded" thì áp ngay vào form để hiển thị
+    ensureUser();
+    if (photoSource.value === 'uploaded') {
+      poster.user.photo = uploadedPhoto.value!;
+    }
+
+    if (input) input.value = ''; // cho phép chọn lại cùng file
+  };
+  reader.onerror = () => {
+    console.error('[upload] read error:', reader.error);
+    if (input) input.value = '';
+  };
+
+  reader.readAsDataURL(file); // đọc thành dataURL (base64)
 }
 
 function saveDraft() {
   localStorage.setItem(
     `poster-draft-${activeTemplate.value}`,
-    JSON.stringify(activeForm.value)
+    JSON.stringify(poster)
   );
   alert("Đã lưu nháp!");
 }
@@ -469,7 +480,7 @@ async function exportPng() {
   const canvas = await html2canvas(el, { backgroundColor: "#fff", scale: 2 });
 
   const a = document.createElement("a");
-  a.download = `${activeTemplate.value}-${activeForm.value.user.fullName || "poster"}.png`;
+  a.download = `${activeTemplate.value}-${poster.user.fullName || "poster"}.png`;
   a.href = canvas.toDataURL("image/png");
   a.click();  // Tạo một click tự động để tải ảnh
 }

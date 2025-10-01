@@ -8,24 +8,15 @@
       </div>
       <div class="hd-right">
         <button class="btn primary" @click="onCreate">Tạo mới</button>
-        <button class="btn" @click="exportCsv">Export CSV</button>
+        <button class="btn" @click="null">Export CSV</button>
       </div>
     </header>
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input
-        v-model="q"
-        type="search"
-        class="input"
-        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
-      />
-      <label class="check"
-        ><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label
-      >
-      <label class="check"
-        ><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label
-      >
+      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…" />
+      <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
+      <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label>
       <select v-model="styleFilter" class="select">
         <option value="">Tất cả style</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
@@ -50,15 +41,8 @@
         </thead>
 
         <tbody>
-          <poster
-            v-for="(p, index) in paginated"
-            :key="p.posterId"
-            :poster="p"
-            :index="index + 1"
-            @view="onView"
-            @edit="onEdit"
-            @delete="onDelete"
-          />
+          <poster v-for="(p, index) in paginated" :key="p.posterId" :poster="p" :index="index + 1" @view="onView"
+            @edit="onEdit" @delete="onDelete" />
           <tr v-if="paginated.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -77,44 +61,94 @@
         »
       </button>
     </footer>
-
-    <poster-new-hire v-if="selectedPoster" :poster="selectedPoster" />
+    <div v-if="showPreview" class="modal-backdrop" @click="closePreview">
+      <div class="modal" @click.stop>
+        <div class="modal-hd">
+          <button class="btn" @click="closePreview">Đóng</button>
+        </div>
+        <div class="modal-body">
+          <!-- Khung preview (tỉ lệ poster) -->
+          <div class="poster-preview-shell">
+            <div class="poster-preview-surface">
+              <component v-if="previewForm" :is="previewComponent" :form="previewForm" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, onBeforeUnmount } from "vue";
 import poster from "../components/Poster.vue";
-import posterNewHire from "../components/PosterNewHire.vue";
+import PosterNewHire from "../components/PosterNewHire.vue";
+import PosterRecognition from "../components/PosterRecognition.vue";
 import type { Poster } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
 import type { User } from "../model/user"; // nếu chưa có, xem chú thích ở cuối
 import type { Role } from "../model/role";
+import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
+function closePreview() {
+  showPreview.value = false;   // Ẩn modal
+  selectedPoster.value = null; // Xoá poster đang chọn
+}
+
+const showPreview = ref(false);
+const selectedPoster = ref<Poster | null>(null);
+function resolvePreviewComponent(p?: Poster | null) {
+  if (!p) return PosterNewHire;
+
+  const id = (p.postStyleId || "").toLowerCase();
+  if (id === "1") return PosterNewHire;
+  if (id === "2") return PosterRecognition;
+
+  return PosterNewHire; // fallback
+}
+const previewComponent = computed(() => resolvePreviewComponent(selectedPoster.value));
+
+// Adapter dữ liệu từ Poster -> form/props mà poster component cần
+const previewForm = computed(() => {
+  const p = selectedPoster.value;
+  if (!p) return null;
+
+  return {
+    postStyleId: resolvePreviewComponent(p) === PosterNewHire ? "1" : "2",
+    title: p.title || "CHÀO MỪNG BẠN ĐẾN VỚI",
+    companyName: p.companyName || "TÊN CÔNG TY",
+    user: p.user,
+    logo: defaultLogo,
+  };
+});
+// demo role
 const roleDemo: Role = {
   roleId: 1, // Chỉ số vai trò (Role ID)
   roleName: "Tester", // Tên vai trò
 };
 // demo user
 const userDemo: User = {
-  userId: 101,
-  username: "johndoe",
-  password: "password123",
+  userId: 1,
+  username: "user1",
+  password: "password1",
   phone: "0123456789",
-  email: "johndoe@example.com",
-  fullName: "John Doe",
-  refreshToken: "some_refresh_token_12345",
+  email: "user1@example.com",
+  fullName: "Nguyen Van A",
   gender: "Male",
-  dob: "1990-01-01", // Ngày sinh (ISO format)
+  dob: "1990-01-01",
   statusUser: "Active",
-  createDate: "2025-01-01T12:00:00Z", // ISO string cho ngày tạo
-  updateDate: "2025-01-10T12:00:00Z", // ISO string cho ngày cập nhật
-  role: roleDemo, // Gán role cho người dùng
+  createDate: "2024-01-01T00:00:00Z",
+  updateDate: "2024-01-01T00:00:00Z",
   homeTown: "Hà Nội",
+  role: {
+    roleId: 1,
+    roleName: "HR"
+  },
+  photo: "/src/assets/image-poster-banner/photo-test.png",
 };
 // seed demo
 const posters: Poster[] = [
   {
     posterId: "p001",
-    title: "Chào mừng",
+    title: "CHÀO MỪNG BẠN ĐẾN VỚI",
     content: "Chào mừng bạn đến với công ty!",
     filePath: "/images/p001.png",
     createdAt: "2025-09-01",
@@ -124,11 +158,8 @@ const posters: Poster[] = [
     isDraft: false,
     isDeleted: false,
     user: userDemo,
-    postStyleId: "new hire",
-    photoId: "photo001",
-        companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    postStyleId: "1",
+    companyName: "Revotech",
   },
   {
     posterId: "p002",
@@ -143,10 +174,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style02",
-    photoId: "photo002",
-        companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p003",
@@ -161,10 +189,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style03",
-    photoId: "photo003",
-            companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p004",
@@ -179,10 +204,7 @@ const posters: Poster[] = [
     isDeleted: true,
     user: userDemo,
     postStyleId: "style04",
-    photoId: "photo004",
-            companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p005",
@@ -197,10 +219,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style05",
-    photoId: "photo005",
-            companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   // 8 thêm bản ghi mới
   {
@@ -216,10 +235,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style06",
-    photoId: "photo006",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p007",
@@ -234,10 +250,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style07",
-    photoId: "photo007",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p008",
@@ -252,10 +265,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style08",
-    photoId: "photo008",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p009",
@@ -270,10 +280,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style09",
-    photoId: "photo009",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p010",
@@ -288,10 +295,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style10",
-    photoId: "photo010",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p011",
@@ -306,10 +310,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style11",
-    photoId: "photo011",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p012",
@@ -324,10 +325,7 @@ const posters: Poster[] = [
     isDeleted: true,
     user: userDemo,
     postStyleId: "style12",
-    photoId: "photo012",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
   {
     posterId: "p013",
@@ -342,10 +340,7 @@ const posters: Poster[] = [
     isDeleted: false,
     user: userDemo,
     postStyleId: "style13",
-    photoId: "photo013",
-                companyName: "Công ty XYZ",
-    month: "09",  // tháng
-    year: "2025",  // năm
+    companyName: "Công ty XYZ",
   },
 ];
 
@@ -364,7 +359,7 @@ const filtered = computed(() => {
     if (deletedOnly.value && !p.isDeleted) return false;
     if (styleFilter.value && p.postStyleId !== styleFilter.value) return false;
     if (!kw) return true;
-    return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.user, p.photoId]
+    return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.user]
       .join(" ")
       .toLowerCase()
       .includes(kw);
@@ -400,13 +395,12 @@ const formNewHire = reactive({
 });
 
 // Khai báo selectedPoster là reactive object
-const selectedPoster = reactive({});  // empty object
+// empty object
 
 // Hàm onView sẽ gán formNewHire vào selectedPoster
 function onView(p: Poster) {
-  // Gán toàn bộ dữ liệu formNewHire vào selectedPoster
-  Object.assign(selectedPoster, formNewHire);
-  console.log(selectedPoster);  // Kiểm tra giá trị đã gán
+  selectedPoster.value = p;     // gán poster đang chọn
+  showPreview.value = true;     // mở modal
 }
 function onEdit(p: Poster) {
   alert(`Sửa ${p.posterId}`);
@@ -415,50 +409,7 @@ function onDelete(p: Poster) {
   alert(`Xóa ${p.posterId}`);
 }
 
-// csv
-function exportCsv() {
-  const rows = [
-    [
-      "posterId",
-      "title",
-      "content",
-      "filePath",
-      "createdAt",
-      "updatedAt",
-      "createdBy",
-      "updatedBy",
-      "isDraft",
-      "isDeleted",
-      "userId",
-      "postStyleId",
-      "photoId",
-    ],
-    ...filtered.value.map((p) => [
-      p.posterId,
-      p.title,
-      p.content,
-      p.filePath,
-      p.createdAt,
-      p.updatedAt,
-      p.createdBy,
-      p.updatedBy,
-      p.isDraft,
-      p.isDeleted,
-      p.userId,
-      p.postStyleId,
-      p.photoId,
-    ]),
-  ];
-  const csv = rows
-    .map((r) => r.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(","))
-    .join("\n");
-  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "posters.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}
+
 </script>
 
 <style scoped>
@@ -597,10 +548,12 @@ function exportCsv() {
 .table td:nth-child(1) {
   width: 50px;
 }
+
 .table th:nth-child(2),
 .table td:nth-child(2) {
   width: 90px;
 }
+
 .table th:nth-child(3),
 .table td:nth-child(4) {
   width: 200px;
@@ -720,5 +673,82 @@ function exportCsv() {
   /* giới hạn ngang */
   font-size: 14px;
   /* chữ vừa */
+}
+
+/* Nền tối phủ toàn màn hình */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  /* luôn nổi trên cùng */
+}
+
+/* Hộp modal */
+.modal {
+  width: min(90vw, 930px);
+  max-height: 90vh;
+  background: #fff;
+  color: #111;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header modal */
+.modal-hd {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+/* Nút đóng */
+.btn {
+  background: #e5e7eb;
+  border: none;
+  color: #111;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: #d1d5db;
+}
+
+/* Body modal */
+.modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: 16 px;
+  background: #fff;
+}
+
+/* Vỏ bọc preview poster */
+.poster-preview-shell {
+  display: grid;
+  place-items: center;
+}
+
+/* Khung preview poster (tỉ lệ cố định) */
+.poster-preview-surface {
+  width: min(100%, 850px);
+  aspect-ratio: 3 / 4;
+  /* tỉ lệ đứng 3:4 */
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

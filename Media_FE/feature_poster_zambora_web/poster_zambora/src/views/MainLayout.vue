@@ -9,7 +9,7 @@
         </div>
       </div>
       <nav class="nav">
-        <RouterLink to="/comms/posters" class="link" active-class="active">Poster Studio</RouterLink>
+        <RouterLink to="/comms/posters/create" class="link" active-class="active">Poster Studio</RouterLink>
         <RouterLink to="/comms/posters/manager" class="link">Manager poster</RouterLink>
       </nav>
       <div class="sb-foot">v1.0 • Vue 3</div>
@@ -38,3 +38,14 @@ const pageTitle = computed(()=> {
   return 'Dashboard'
 })
 </script>
+
+<style scoped>
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: #f9fafb;
+  color: #111827;
+  font-family: system-ui, sans-serif;
+}
+</style>

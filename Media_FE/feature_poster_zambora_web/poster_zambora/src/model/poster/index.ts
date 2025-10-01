@@ -12,10 +12,8 @@ export type Poster = {
     isDeleted: boolean;
     user: User;
     postStyleId: string;
-    photoId?: string;
+    // photoId?: string;
     //photoId: string;
     //*****/
     companyName: string;
-    month: string;
-    year: string;
 }

@@ -9,7 +9,11 @@ const routes = [
     component: MainLayout,
     children: [
       {
-        path: 'comms/posters',
+        path: '',
+        redirect: '/comms/posters/create'
+      },
+      {
+        path: 'comms/posters/create',
         name: 'posters',
         component: PostersPage
       },
@@ -18,7 +22,7 @@ const routes = [
         name: 'manager-poster',
         component: ManagerPoster
       }
-      
+
     ]
   }
 ]

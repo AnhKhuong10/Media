@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { defineProps, ref } from "vue";
-import type { Poster } from "@/model/poster"; // ✅ Dùng lại type đã có
+import type { Poster } from "../model/poster"; // ✅ Dùng lại type đã có
 
 defineProps<{
   poster: Poster;

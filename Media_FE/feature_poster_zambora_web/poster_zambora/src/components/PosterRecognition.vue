@@ -2,11 +2,7 @@
   <div class="wrap">
     <!-- Hero -->
     <div class="hero">
-      <img
-        :src="form.logo"
-        alt="Zambora"
-        style="position: absolute; top: 20px; left: 20px; width: 200px"
-      />
+      <img :src="form.logo" alt="Zambora" style="position: absolute; top: 20px; left: 20px; width: 200px" />
       <div class="headline">{{ form.title }}</div>
       <div class="branch">{{ form.companyName }}</div>
     </div>
@@ -16,7 +12,7 @@
     <div class="medal">
       <!-- avatar lọt vòng -->
       <div class="medal-hole">
-        <img v-if="form.avatar" :src="form.user.photo" class="medal-photo" />
+        <img v-if="form.user.photo" :src="form.user.photo" class="medal-photo" />
         <div v-else class="medal-photo ph">Ảnh nhân viên</div>
       </div>
 
@@ -28,7 +24,7 @@
     <div class="award">
       <div class="award-headline">
         NHÂN VIÊN XUẤT SẮC<br />
-        THÁNG {{ form.month }}.{{ form.year }}
+        THÁNG {{ currentMonth }}.{{ currentYear }}
       </div>
       <div class="award-sub">
         Một tháng làm việc tuyệt vời - một dấu ấn đáng tự hào!<br />
@@ -42,6 +38,15 @@
 <script setup>
 defineProps({ form: Object });
 import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
+import { computed } from "vue";
+const currentMonth = computed(() => {
+  const d = new Date();
+  return d.getMonth() + 1; // getMonth trả 0–11
+});
+
+const currentYear = computed(() => {
+  return new Date().getFullYear();
+});
 </script>
 
 <style scoped>
@@ -51,12 +56,14 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
   font-size: 35px;
   margin-top: 100px;
 }
+
 .branch {
   text-transform: uppercase;
   font-weight: 600;
   font-size: 35px;
   margin-top: 5px;
 }
+
 .title {
   text-transform: uppercase;
   font-size: 40px;
@@ -65,12 +72,12 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
   color: #fff;
   margin-top: -20px;
 }
+
 .wrap {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url("@/assets/image-poster-banner/background-vinhdanh.png") no-repeat top
-    center;
+  background: url("@/assets/image-poster-banner/background-vinhdanh.png") no-repeat top center;
   background-size: cover;
   border-radius: 16px;
   overflow: hidden;
@@ -84,6 +91,7 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
   flex-direction: column;
   align-items: center;
 }
+
 .badge {
   background: rgba(255, 255, 255, 0.2);
   padding: 8px 16px;
@@ -95,12 +103,12 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
 .medal {
   position: absolute;
   left: 50%;
-  top: 40%; /* vị trí khung avatar */
+  top: 40%;
+  /* vị trí khung avatar */
   transform: translate(-50%, -50%);
   width: 370px;
   aspect-ratio: 1/1;
-  background: url("@/assets/image-poster-banner/khung-vinh-danh.png") center/contain
-    no-repeat;
+  background: url("@/assets/image-poster-banner/khung-vinh-danh.png") center/contain no-repeat;
 }
 
 /* Lỗ tròn bên trong vòng để chứa avatar */
@@ -129,15 +137,20 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
   color: #64748b;
   font-size: 14px;
 }
+
 .medal-star {
   position: absolute;
-  bottom: 97%; /* đẩy ra phía trên khung */
+  bottom: 97%;
+  /* đẩy ra phía trên khung */
   left: 50%;
-  transform: translate(-50%, -20%); /* căn giữa và nhích xuống một chút */
-  width: 20%; /* chỉnh size cụm sao */
+  transform: translate(-50%, -20%);
+  /* căn giữa và nhích xuống một chút */
+  width: 20%;
+  /* chỉnh size cụm sao */
   z-index: 2;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
+
 .award {
   position: absolute;
   left: 50%;
@@ -147,6 +160,7 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
   text-align: center;
   color: #fff;
 }
+
 .award-headline {
   color: #facc15;
   text-transform: uppercase;
@@ -155,11 +169,13 @@ import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
   font-size: 40px;
   line-height: 1.25;
 }
+
 .award-sub {
   margin-top: 20px;
   font-size: clamp(12px, 1.6vw, 16px);
   line-height: 1.6;
   font-size: 23px;
   opacity: 0.92;
+  font-weight: bold;
 }
 </style>
