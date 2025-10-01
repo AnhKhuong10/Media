@@ -8,11 +8,13 @@ import org.springframework.web.multipart.MultipartFile
 interface PhotoService {
     fun getPhoto(@Argument photoId: Long): PhotoDTO?
     fun getUserPhotos(@Argument userId: Long): List<PhotoDTO>
-//    fun createPhoto(userId: Long, file: MultipartFile, name: String?): PhotoEntity
+
+    //    fun createPhoto(userId: Long, file: MultipartFile, name: String?): PhotoEntity
     fun createPhoto(
         userId: Long,
         file: MultipartFile,
         filename: String? = null,
-//        extraMetadata: Map<String, Any>? = null
     ): PhotoEntity
+
+    fun createPhotoOnAlbum(userId: Long, file: MultipartFile, ): PhotoEntity
 }

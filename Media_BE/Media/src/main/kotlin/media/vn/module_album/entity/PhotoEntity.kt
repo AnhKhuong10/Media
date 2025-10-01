@@ -54,4 +54,5 @@ data class PhotoEntity(
     @OneToMany(mappedBy = "photo", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     val albumPhotos: List<AlbumPhotoEntity> = emptyList()
+
 )
