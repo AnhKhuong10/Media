@@ -10,10 +10,10 @@ data class Poster(
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "poster_id")
-    val posterId: Long,
+    val posterId: Long = 0,
 
-    val title: String?,
-    val content: String?,
+    val title: String,
+    val content: String,
 
     @Column(name = "file_path")
     val filePath: String?,
@@ -21,6 +21,8 @@ data class Poster(
     @Enumerated(EnumType.STRING)
     @Column(name = "poster_type")
     val posterType: PosterEnum,
+
+    var companyName: String,
     val createDate: LocalDate = LocalDate.now(),
     val updateDate: LocalDate?,
     val createdBy: String?,
@@ -37,5 +39,5 @@ data class Poster(
     val user: User,
 
     @OneToMany(mappedBy = "poster", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var posterReactions: List<PosterReaction> = mutableListOf()
+    var posterReactions: List<PosterReaction>? = null
 )

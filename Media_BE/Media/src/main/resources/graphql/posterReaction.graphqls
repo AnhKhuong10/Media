@@ -1,0 +1,14 @@
+enum ReactionEnum {
+    like,
+    love,
+    haha,
+    wow,
+    sad,
+    angry
+}
+
+type PosterReaction {
+    posterReactionId: ID!
+    posterReaction: ReactionEnum!
+    poster: Poster,
+}

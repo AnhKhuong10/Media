@@ -31,6 +31,12 @@ dependencies {
 	// Password encoder
 	implementation("org.springframework.security:spring-security-crypto")
 
+	//upload
+	// GraphQL Kickstart
+	implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:11.1.0")
+	implementation("com.graphql-java-kickstart:graphql-java-tools:11.1.0")
+	implementation("com.graphql-java-kickstart:graphql-java-servlet:11.1.0")
+
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.graphql:spring-graphql")
 	implementation("org.springframework.boot:spring-boot-starter-graphql")
@@ -39,7 +45,6 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("com.graphql-java:graphql-java-extended-scalars:21.0")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("com.graphql-java:graphql-java-extended-scalars:21.0")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
