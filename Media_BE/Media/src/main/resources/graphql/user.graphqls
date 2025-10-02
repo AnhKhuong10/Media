@@ -21,3 +21,23 @@ type User{
     dob: Date,
     role: Role!
 }
+
+type UserDTO{
+    userId: ID,
+    username: String,
+    fullName: String,
+    gender: GenderEnum,
+    email: String,
+    phone: String,
+    dob: Date,
+    roleName: String
+}
+
+type UserPage {
+    content: [UserDTO!]!
+}
+
+extend type Query{
+    getUserPage(search: String) : UserPage!
+    userByUserId(userId: ID!): UserDTO
+}
