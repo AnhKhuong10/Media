@@ -1,0 +1,46 @@
+
+enum GenderEnum{
+    male,
+    female,
+    other
+}
+
+enum StatusUser{
+    active,
+    inactive,
+    banned
+}
+
+type User{
+    userId: ID,
+    username: String,
+    phone: String,
+    password: String,
+    email: String,
+    fullName: String,
+    dob: Date,
+    role: Role!
+}
+
+type UserDTO{
+    userId: ID,
+    username: String,
+    fullName: String,
+    gender: GenderEnum,
+    email: String,
+    phone: String,
+    dob: Date,
+    roleName: String
+    homeTown: String
+    createDate: Date
+    avatar: String
+}
+
+type UserPage {
+    content: [UserDTO!]!
+}
+
+extend type Query{
+    getUserPage(search: String) : UserPage!
+    userByUserId(userId: ID!): UserDTO
+}

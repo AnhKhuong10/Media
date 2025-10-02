@@ -3,6 +3,7 @@ plugins {
 	kotlin("plugin.spring") version "1.9.25"
 	id("org.springframework.boot") version "3.5.6"
 	id("io.spring.dependency-management") version "1.1.7"
+	kotlin("plugin.jpa") version "1.9.25"
 }
 
 group = "media.vn"
@@ -20,12 +21,30 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-graphql")
-	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+	// Spring Security
 	implementation("org.springframework.boot:spring-boot-starter-security")
+
+	// JWT (Nimbus)
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
+	// Password encoder
+	implementation("org.springframework.security:spring-security-crypto")
+
+	//upload
+	// GraphQL Kickstart
+	implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:11.1.0")
+	implementation("com.graphql-java-kickstart:graphql-java-tools:11.1.0")
+	implementation("com.graphql-java-kickstart:graphql-java-servlet:11.1.0")
+
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.graphql:spring-graphql")
+	implementation("org.springframework.boot:spring-boot-starter-graphql")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("com.graphql-java:graphql-java-extended-scalars:21.0")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
