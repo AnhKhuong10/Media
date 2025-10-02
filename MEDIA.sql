@@ -83,11 +83,12 @@ CREATE TABLE shared_album (
 
 -- Bảng poster
 CREATE TABLE poster (
-    poster_id BIGINT PRIMARY KEY,
+    poster_id BIGINT PRIMARY KEY ,
     title VARCHAR(255),
     content TEXT,
     file_path VARCHAR(255),
     poster_type VARCHAR(255),
+	comanyName VARCHAR(255),
     create_date DATE DEFAULT CURRENT_DATE,
     update_date DATE,
     created_by VARCHAR(255),

@@ -1,0 +1,55 @@
+scalar Upload
+
+enum PosterEnum {
+    HONOR
+    NEW_EMPLOYEE
+}
+
+type Poster {
+    posterId: ID!
+    title: String!
+    content: String!
+    filePath: String
+    posterType: PosterEnum!
+    companyName: String
+    createDate: String
+    updateDate: String
+    createdBy: String
+    updatedBy: String
+    isDraft: Boolean
+    isDeleted: Boolean
+    user: User!
+    posterReactions: [PosterReaction]
+}
+
+type PosterDTO{
+    posterId: ID!
+    title: String!
+    content: String!
+    companyName: String
+    createDate: String
+    updateDate: String
+    createdBy: String
+    updatedBy: String
+}
+
+type PosterPage{
+    content: [PosterDTO]!,
+    totalPages: Int,
+    totalElements: Int,
+    pageNumber: Int,
+    pageSize: Int
+}
+
+input PosterCreateInput{
+    userId: ID,
+    file: Upload,
+    title: String,
+    content: String,
+    posterType: PosterEnum,
+    companyName: String
+}
+
+extend type Mutation{
+    createPoster(input: PosterCreateInput): PosterDTO
+}
