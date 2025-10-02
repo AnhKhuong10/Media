@@ -1,19 +1,17 @@
 import type { User } from "../user";
+
 export type Poster = {
-    posterId: string;
-    title: string;
-    content: string;
-    filePath: string;
-    createdAt: string;
-    updatedAt: string;
-    createdBy: string;
-    updatedBy: string;
-    isDraft: boolean;
-    isDeleted: boolean;
-    user: User;
-    postStyleId: string;
-    // photoId?: string;
-    //photoId: string;
-    //*****/
-    companyName: string;
-}
+  posterId: number;           
+  title: string;
+  content: string;
+  filePath: string | null;      
+  posterType: string;           
+  companyName: string;
+  createDate: string;           
+  updateDate: string | null;    
+  createdBy?: string | null;    
+  updatedBy?: string | null;    
+  isDraft: boolean;
+  isDeleted: boolean;
+  user: User;
+};

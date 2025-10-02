@@ -138,6 +138,9 @@ import PosterRecognition from "../components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
+const props = defineProps<{
+  posterData?: any;   // dữ liệu truyền vào khi edit
+}>();
 
 const photoSource = ref<'default' | 'uploaded'>('default');
 const uploadedPhoto = ref<string | null>(null);
@@ -208,13 +211,16 @@ function selectUser(user: User) {
   showModal.value = false;
 }
 
-const poster = reactive({
-  postStyleId: "1",
-  title: "CHÀO MỪNG BẠN ĐẾN VỚI",
-  companyName: "TÊN CÔNG TY",
-  user: {} as User,
-  logo: defaultLogo,
-});
+const poster = reactive(
+  props.posterData
+    ? { ...props.posterData }   // Khi Edit thì load dữ liệu sẵn có
+    : {
+        posterType: "New Hire",       // Mặc định Nhân viên mới
+        title: "CHÀO MỪNG BẠN ĐẾN VỚI",
+        companyName: "TÊN CÔNG TY",
+        user: {} as User,
+      }
+);
 
 const usersDemo = reactive([
   {
@@ -408,7 +414,12 @@ const usersDemo = reactive([
     photo: "/src/assets/image-poster-banner/photo-test.png",
   },
 ]);
-const activeTemplate = ref("1");
+const activeTemplate = ref(poster.postStyleId || "1");
+
+watch(activeTemplate, (val) => {
+  poster.postStyleId = val;   // đồng bộ khi đổi select box
+});
+
 
 const currentPoster = computed(() =>
   activeTemplate.value === "1" ? PosterNewHire : PosterRecognition

@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import MainLayout from '@/views/MainLayout.vue'
-import PostersPage from '@/views/PostersPage.vue'
-import ManagerPoster from '@/views/ManagerPoster.vue'
+import MainLayout from '../views/MainLayout.vue'
+import PostersPage from '../components/PostersPage.vue'
+import ManagerPoster from '../views/ManagerPoster.vue'
 
 const routes = [
   {

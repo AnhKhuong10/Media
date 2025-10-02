@@ -2,7 +2,11 @@
   <div class="wrap">
     <!-- Hero -->
     <div class="hero">
-      <img :src="form.logo" alt="Zambora" style="position: absolute; top: 20px; left: 20px; width: 200px" />
+      <img
+        :src="defaultLogo"
+        alt="Zambora"
+        style="position: absolute; top: 20px; left: 20px; width: 200px"
+      />
       <div class="headline">{{ form.title }}</div>
       <div class="branch">{{ form.companyName }}</div>
     </div>
@@ -38,6 +42,7 @@
 <script setup>
 defineProps({ form: Object });
 import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
+import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { computed } from "vue";
 const currentMonth = computed(() => {
   const d = new Date();
@@ -77,7 +82,8 @@ const currentYear = computed(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url("@/assets/image-poster-banner/background-vinhdanh.png") no-repeat top center;
+  background: url("@/assets/image-poster-banner/background-vinhdanh.png") no-repeat top
+    center;
   background-size: cover;
   border-radius: 16px;
   overflow: hidden;
@@ -108,7 +114,8 @@ const currentYear = computed(() => {
   transform: translate(-50%, -50%);
   width: 370px;
   aspect-ratio: 1/1;
-  background: url("@/assets/image-poster-banner/khung-vinh-danh.png") center/contain no-repeat;
+  background: url("@/assets/image-poster-banner/khung-vinh-danh.png") center/contain
+    no-repeat;
 }
 
 /* Lỗ tròn bên trong vòng để chứa avatar */

@@ -14,9 +14,18 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…" />
-      <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
-      <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label>
+      <input
+        v-model="q"
+        type="search"
+        class="input"
+        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
+      />
+      <label class="check"
+        ><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label
+      >
+      <label class="check"
+        ><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label
+      >
       <select v-model="styleFilter" class="select">
         <option value="">Tất cả style</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
@@ -41,8 +50,15 @@
         </thead>
 
         <tbody>
-          <poster v-for="(p, index) in paginated" :key="p.posterId" :poster="p" :index="index + 1" @view="onView"
-            @edit="onEdit" @delete="onDelete" />
+          <poster
+            v-for="(p, index) in paginated"
+            :key="p.posterId"
+            :poster="p"
+            :index="index + 1"
+            @view="onView"
+            @edit="onEdit"
+            @delete="onDelete"
+          />
           <tr v-if="paginated.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -61,8 +77,10 @@
         »
       </button>
     </footer>
+
+    <!-- modal preview -->
     <div v-if="showPreview" class="modal-backdrop" @click="closePreview">
-      <div class="modal" @click.stop>
+      <div class="modal-preview" @click.stop>
         <div class="modal-hd">
           <button class="btn" @click="closePreview">Đóng</button>
         </div>
@@ -76,6 +94,18 @@
         </div>
       </div>
     </div>
+
+    <!-- modal edit -->
+    <div v-if="showStudio" class="modal-backdrop" @click="showStudio = false">
+      <div class="modal-edit" @click.stop>
+        <div class="modal-hd">
+          <button class="btn" @click="showStudio = false">Đóng</button>
+        </div>
+        <div class="modal-body">
+          <PostersPage :posterData="editingPoster" />
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -84,23 +114,28 @@ import { ref, computed, reactive, onBeforeUnmount } from "vue";
 import poster from "../components/Poster.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
+import PostersPage from "../components/PostersPage.vue";
 import type { Poster } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
 import type { User } from "../model/user"; // nếu chưa có, xem chú thích ở cuối
 import type { Role } from "../model/role";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
+
 function closePreview() {
-  showPreview.value = false;   // Ẩn modal
+  showPreview.value = false; // Ẩn modal
   selectedPoster.value = null; // Xoá poster đang chọn
 }
+
+const showStudio = ref(false); // bật/tắt modal PosterStudio
+const editingPoster = ref<Poster | null>(null); // dữ liệu poster đang edit
 
 const showPreview = ref(false);
 const selectedPoster = ref<Poster | null>(null);
 function resolvePreviewComponent(p?: Poster | null) {
   if (!p) return PosterNewHire;
 
-  const id = (p.postStyleId || "").toLowerCase();
-  if (id === "1") return PosterNewHire;
-  if (id === "2") return PosterRecognition;
+  const type = (p.posterType || "").toLowerCase();
+  if (type === "1") return PosterNewHire;
+  if (type === "2") return PosterRecognition;
 
   return PosterNewHire; // fallback
 }
@@ -119,6 +154,7 @@ const previewForm = computed(() => {
     logo: defaultLogo,
   };
 });
+
 // demo role
 const roleDemo: Role = {
   roleId: 1, // Chỉ số vai trò (Role ID)
@@ -140,207 +176,41 @@ const userDemo: User = {
   homeTown: "Hà Nội",
   role: {
     roleId: 1,
-    roleName: "HR"
+    roleName: "HR",
   },
   photo: "/src/assets/image-poster-banner/photo-test.png",
 };
 // seed demo
 const posters: Poster[] = [
   {
-    posterId: "p001",
+    posterId: 1,
     title: "CHÀO MỪNG BẠN ĐẾN VỚI",
     content: "Chào mừng bạn đến với công ty!",
     filePath: "/images/p001.png",
-    createdAt: "2025-09-01",
-    updatedAt: "2025-09-02",
+    createDate: "2025-09-01",
+    updateDate: "2025-09-02",
     createdBy: "Admin",
     updatedBy: "Admin",
     isDraft: false,
     isDeleted: false,
     user: userDemo,
-    postStyleId: "1",
     companyName: "Revotech",
+    posterType: "New Hire",
   },
   {
-    posterId: "p002",
+    posterId: 2,
     title: "Vinh danh",
     content: "Vinh danh nhân viên xuất sắc tháng 9!",
     filePath: "/images/p002.png",
-    createdAt: "2025-09-05",
-    updatedAt: "2025-09-06",
+    createDate: "2025-09-05",
+    updateDate: "2025-09-06",
     createdBy: "Manager1",
     updatedBy: "Manager1",
     isDraft: false,
     isDeleted: false,
     user: userDemo,
-    postStyleId: "style02",
     companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p003",
-    title: "Thông báo",
-    content: "Thông báo nghỉ lễ 2/9",
-    filePath: "/images/p003.png",
-    createdAt: "2025-08-28",
-    updatedAt: "2025-08-30",
-    createdBy: "Hr",
-    updatedBy: "Hr",
-    isDraft: true,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style03",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p004",
-    title: "Tuyển dụng",
-    content: "Tuyển dụng thực tập sinh IT",
-    filePath: "/images/p004.png",
-    createdAt: "2025-07-12",
-    updatedAt: "2025-07-13",
-    createdBy: "Recruiter1",
-    updatedBy: "Recruiter2",
-    isDraft: false,
-    isDeleted: true,
-    user: userDemo,
-    postStyleId: "style04",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p005",
-    title: "Chúc mừng sinh nhật",
-    content: "Chúc mừng sinh nhật các thành viên tháng 9!",
-    filePath: "/images/p005.png",
-    createdAt: "2025-09-15",
-    updatedAt: "2025-09-16",
-    createdBy: "Hr",
-    updatedBy: "Admin",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style05",
-    companyName: "Công ty XYZ",
-  },
-  // 8 thêm bản ghi mới
-  {
-    posterId: "p006",
-    title: "Thông báo nghỉ lễ 30/4",
-    content: "Thông báo nghỉ lễ 30/4 và 1/5",
-    filePath: "/images/p006.png",
-    createdAt: "2025-04-25",
-    updatedAt: "2025-04-26",
-    createdBy: "Hr",
-    updatedBy: "Hr",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style06",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p007",
-    title: "Mở rộng đội ngũ IT",
-    content: "Tuyển dụng lập trình viên và kỹ sư phần mềm.",
-    filePath: "/images/p007.png",
-    createdAt: "2025-05-10",
-    updatedAt: "2025-05-11",
-    createdBy: "Recruiter2",
-    updatedBy: "Recruiter2",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style07",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p008",
-    title: "Chúc mừng ngày Quốc tế Phụ nữ",
-    content: "Chúc mừng các chị em nhân ngày Quốc tế Phụ nữ 8/3.",
-    filePath: "/images/p008.png",
-    createdAt: "2025-03-08",
-    updatedAt: "2025-03-09",
-    createdBy: "Admin",
-    updatedBy: "Admin",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style08",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p009",
-    title: "Thưởng tháng 13",
-    content: "Thông báo về chế độ thưởng tháng 13 cho toàn thể nhân viên.",
-    filePath: "/images/p009.png",
-    createdAt: "2025-12-10",
-    updatedAt: "2025-12-11",
-    createdBy: "Admin",
-    updatedBy: "Admin",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style09",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p010",
-    title: "Đào tạo nhân viên mới",
-    content: "Chương trình đào tạo nhân viên mới vào tháng 6/2025.",
-    filePath: "/images/p010.png",
-    createdAt: "2025-06-01",
-    updatedAt: "2025-06-02",
-    createdBy: "Hr",
-    updatedBy: "Hr",
-    isDraft: true,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style10",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p011",
-    title: "Chính sách lương thưởng năm 2025",
-    content: "Cập nhật chính sách lương thưởng cho năm 2025.",
-    filePath: "/images/p011.png",
-    createdAt: "2025-01-01",
-    updatedAt: "2025-01-02",
-    createdBy: "Hr",
-    updatedBy: "Hr",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style11",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p012",
-    title: "Thông báo vắng mặt",
-    content: "Thông báo về việc vắng mặt của một số nhân viên trong tháng 7/2025.",
-    filePath: "/images/p012.png",
-    createdAt: "2025-07-05",
-    updatedAt: "2025-07-06",
-    createdBy: "Hr",
-    updatedBy: "Hr",
-    isDraft: false,
-    isDeleted: true,
-    user: userDemo,
-    postStyleId: "style12",
-    companyName: "Công ty XYZ",
-  },
-  {
-    posterId: "p013",
-    title: "Chính sách bảo hiểm",
-    content: "Thông báo về chính sách bảo hiểm mới cho toàn thể nhân viên.",
-    filePath: "/images/p013.png",
-    createdAt: "2025-11-20",
-    updatedAt: "2025-11-21",
-    createdBy: "Admin",
-    updatedBy: "Admin",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    postStyleId: "style13",
-    companyName: "Công ty XYZ",
+    posterType: "Recognition",
   },
 ];
 
@@ -350,7 +220,7 @@ const draftOnly = ref(false);
 const deletedOnly = ref(false);
 const styleFilter = ref<string>("");
 
-const styleOptions = Array.from(new Set(posters.map((p) => p.postStyleId)));
+const styleOptions = Array.from(new Set(posters.map((p) => p.posterType)));
 
 const filtered = computed(() => {
   const kw = q.value.trim().toLowerCase();
@@ -381,35 +251,20 @@ const paginated = computed(() => {
 function onCreate() {
   alert("Mở form tạo mới");
 }
-const formNewHire = reactive({
-  template: "new-hire",
-  headline: "CHÀO MỪNG BẠN ĐẾN VỚI",
-  subheadline: "TÊN CÔNG TY",
-  name: "TÊN NHÂN VIÊN",
-  role: "VỊ TRÍ CÔNG VIỆC",
-  yob: "NĂM SINH",
-  hometown: "QUÊ QUÁN",
-  logo: "/assets/image-poster-banner/photo-test.png",
-  avatar: "",
-  primary: "#1d4ed8",
-});
-
-// Khai báo selectedPoster là reactive object
-// empty object
 
 // Hàm onView sẽ gán formNewHire vào selectedPoster
 function onView(p: Poster) {
-  selectedPoster.value = p;     // gán poster đang chọn
-  showPreview.value = true;     // mở modal
+  selectedPoster.value = p; // gán poster đang chọn
+  showPreview.value = true; // mở modal
 }
 function onEdit(p: Poster) {
-  alert(`Sửa ${p.posterId}`);
+  editingPoster.value = { ...p }; // clone để tránh sửa trực tiếp
+  showStudio.value = true; // mở modal edit
 }
+
 function onDelete(p: Poster) {
   alert(`Xóa ${p.posterId}`);
 }
-
-
 </script>
 
 <style scoped>
@@ -687,9 +542,21 @@ function onDelete(p: Poster) {
 }
 
 /* Hộp modal */
-.modal {
+.modal-preview {
   width: min(90vw, 930px);
   max-height: 90vh;
+  background: #fff;
+  color: #111;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.45);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-edit {
+  width: min(90vw, 1400px);
+  max-height: 100vh;
   background: #fff;
   color: #111;
   border-radius: 16px;
