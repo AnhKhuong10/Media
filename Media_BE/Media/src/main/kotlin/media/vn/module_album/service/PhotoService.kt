@@ -16,5 +16,5 @@ interface PhotoService {
         filename: String? = null,
     ): PhotoEntity
 
-    fun createPhotoOnAlbum(userId: Long, file: MultipartFile, ): PhotoEntity
+//    fun createPhotoOnAlbum(userId: Long, file: MultipartFile, ): PhotoEntity
 }
