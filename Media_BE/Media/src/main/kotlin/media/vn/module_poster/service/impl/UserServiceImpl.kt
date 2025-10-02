@@ -1,10 +1,14 @@
 package media.vn.module_poster.service.impl
 
+import media.vn.module_poster.domain.dto.user.UserDTO
+import media.vn.module_poster.domain.dto.user.UserPage
 import media.vn.module_poster.domain.entity.User
 import media.vn.module_poster.repository.UserRepository
 import media.vn.module_poster.service.UserService
 import media.vn.utils.exception.BusinessException
 import media.vn.utils.exception.ErrorCode
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -37,4 +41,22 @@ class UserServiceImpl (
     override fun getUserByUsernameAndRefreshToken(username: String, refreshToken: String): User? {
         return userRepository.getUserByUsernameAndRefreshToken(username, refreshToken)
     }
+
+    override fun getUserPage(search: String?): List<UserDTO> {
+
+        val users = userRepository.listUser(search)
+
+        return users.map { it.toDTO() }
+    }
+
+    private fun User.toDTO() = UserDTO (
+        userId = this.userId,
+        username =this.username,
+        fullName = this.fullName,
+        gender = this.gender,
+        email = this.email,
+        phone = this.phone,
+        dob = this.dob,
+        roleName = this.role.roleName
+    )
 }
