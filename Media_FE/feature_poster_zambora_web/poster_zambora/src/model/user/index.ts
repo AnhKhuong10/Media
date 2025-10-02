@@ -12,7 +12,8 @@ export type User = {
     statusUser?: string; // VARCHAR(255) - optional
     createDate?: string; // TIMESTAMP - optional, use ISO string
     updateDate?: string; // TIMESTAMP - optional, use ISO string
-    role: Role; // BIGINT - optional
+    roleName: string; // BIGINT - optional
+    avatar: string;
     //*** */
     homeTown: string; // VARCHAR(255) - optional
     photo?: string; // TEXT - optional

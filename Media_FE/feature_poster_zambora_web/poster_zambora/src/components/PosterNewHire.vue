@@ -1,27 +1,19 @@
 <template>
   <div class="wrap">
     <div class="top" :style="{ background: '#1d4ed8' }">
-      <img
-        :src="defaultLogo"
-        alt="Zambora"
-        style="position: absolute; top: 20px; left: 20px; width: 180px"
-      />
+      <img :src="defaultLogo" alt="Zambora" style="position: absolute; top: 20px; left: 20px; width: 180px" />
       <div class="headline">{{ form.title }}</div>
       <div class="headline">{{ form.companyName }}</div>
-      <img
-        src="@/assets/image-poster-banner/gold-stroke.jpg"
-        alt="gold stroke"
-        class="gold-stroke"
-      />
+      <img src="@/assets/image-poster-banner/gold-stroke.jpg" alt="gold stroke" class="gold-stroke" />
     </div>
     <div style="display: flex; justify-content: center; margin-top: -250px">
-      <img v-if="form.user.photo" :src="form.user.photo" class="photo" />
+      <img v-if="form.user.avatar" :src="`http://localhost:8080${form.user.avatar}`" class="photo" />
       <div v-else class="photo ph">Ảnh nhân viên</div>
     </div>
 
     <div class="info">
       <div class="name">{{ form.user.fullName }}</div>
-      <div class="role">Vị trí: {{ form.user.role?.roleName || "Chưa có" }}</div>
+      <div class="role">Vị trí: {{ form.user.roleName || "Chưa có" }}</div>
       <div class="meta">
         Năm sinh: {{ formatDate(form.user.dob) }}
         <br />

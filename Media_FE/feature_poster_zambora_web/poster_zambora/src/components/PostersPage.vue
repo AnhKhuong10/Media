@@ -114,9 +114,9 @@
               <tr v-for="user in filteredUsers" :key="user.userId">
                 <td>{{ user.fullName }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.dob }}</td>
+                <td>{{ formatDate(user.dob) }}</td>
                 <td>{{ user.homeTown }}</td>
-                <td>{{ user.role.roleName }}</td>
+                <td>{{ user.roleName }}</td>
                 <td>{{ formatDate(user.createDate) }}</td>
                 <td>
                   <button @click="selectUser(user)">Chọn</button>
@@ -132,12 +132,39 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch } from "vue";
+import { reactive, ref, computed, watch,onMounted } from "vue";
+import { getAllUser } from "../api/graphql/user-service";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
+
+// Lấy danh sách user cho người dùng chọn trong modal
+const users = ref<User[]>([]);  
+const searchQuery = ref("");
+onMounted(async () => {
+  users.value = await getAllUser();
+  console.log('Fetched users:', users.value);
+});
+function sortByDateAscending() {
+  users.value.sort(
+    (a, b) => new Date(a.createDate!).getTime() - new Date(b.createDate!).getTime()
+  );
+}
+function sortByDateDescending() {
+  users.value.sort(
+    (a, b) => new Date(b.createDate!).getTime() - new Date(a.createDate!).getTime()
+  );
+}
+const filteredUsers = computed(() => {
+  return users.value.filter((user) =>
+    user.fullName?.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+// end Lấy danh sách user cho người dùng chọn trong modal
+
+
 const props = defineProps<{
   posterData?: any;   // dữ liệu truyền vào khi edit
 }>();
@@ -170,32 +197,6 @@ function ensureUser() {
   }
 }
 
-const searchQuery = ref("");
-const filteredUsers = computed(() => {
-  return usersDemo.filter((user) =>
-    user.fullName && user.fullName.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
-// Sắp xếp từ ngày bé đến ngày to
-function sortByDateAscending() {
-  // Sắp xếp trực tiếp trên mảng `usersDemo`
-  usersDemo.sort((a, b) => {
-    const dateA = new Date(a.createDate).getTime();
-    const dateB = new Date(b.createDate).getTime();
-    return dateA - dateB;
-  });
-}
-
-// Sắp xếp từ ngày to đến ngày bé (giảm dần)
-function sortByDateDescending() {
-  // Sắp xếp trực tiếp trên mảng `usersDemo`
-  usersDemo.sort((a, b) => {
-    const dateA = new Date(a.createDate).getTime();
-    const dateB = new Date(b.createDate).getTime();
-    return dateB - dateA;
-  });
-}
-
 const showModal = ref(false);
 function selectUser(user: User) {
   poster.user = user;
@@ -222,198 +223,6 @@ const poster = reactive(
       }
 );
 
-const usersDemo = reactive([
-  {
-    userId: 1,
-    username: "user1",
-    password: "password1",
-    phone: "0123456789",
-    email: "user1@example.com",
-    fullName: "Nguyen Van A",
-    gender: "Male",
-    dob: "1990-01-01",
-    statusUser: "Active",
-    createDate: "2024-01-01T00:00:00Z",
-    updateDate: "2024-01-01T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 2,
-    username: "user2",
-    password: "password2",
-    phone: "0987654321",
-    email: "user2@example.com",
-    fullName: "Nguyen Thi B",
-    gender: "Female",
-    dob: "1992-02-02",
-    statusUser: "Active",
-    createDate: "2023-12-15T00:00:00Z",
-    updateDate: "2023-12-15T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 3,
-    username: "user3",
-    password: "password3",
-    phone: "0345678901",
-    email: "user3@example.com",
-    fullName: "Nguyen Minh C",
-    gender: "Male",
-    dob: "1994-03-03",
-    statusUser: "Inactive",
-    createDate: "2023-11-25T00:00:00Z",
-    updateDate: "2023-11-25T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 4,
-    username: "user4",
-    password: "password4",
-    phone: "0512345678",
-    email: "user4@example.com",
-    fullName: "Le Thi D",
-    gender: "Female",
-    dob: "1996-04-04",
-    statusUser: "Active",
-    createDate: "2023-10-10T00:00:00Z",
-    updateDate: "2023-10-10T00:00:00Z",
-    homeTown: "Hà Nội",
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-  },
-  {
-    userId: 5,
-    username: "user5",
-    password: "password5",
-    phone: "0698765432",
-    email: "user5@example.com",
-    fullName: "Pham Minh E",
-    gender: "Male",
-    dob: "1998-05-05",
-    statusUser: "Active",
-    createDate: "2023-09-22T00:00:00Z",
-    updateDate: "2023-09-22T00:00:00Z",
-    homeTown: "Hà Nội",
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-  },
-  {
-    userId: 6,
-    username: "user6",
-    password: "password6",
-    phone: "0701234567",
-    email: "user6@example.com",
-    fullName: "Tran Thi F",
-    gender: "Female",
-    dob: "1995-06-12",
-    statusUser: "Active",
-    createDate: "2024-06-01T00:00:00Z",
-    updateDate: "2024-06-01T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 7,
-    username: "user7",
-    password: "password7",
-    phone: "0712345678",
-    email: "user7@example.com",
-    fullName: "Le Minh G",
-    gender: "Male",
-    dob: "1993-11-22",
-    statusUser: "Inactive",
-    createDate: "2024-02-20T00:00:00Z",
-    updateDate: "2024-02-20T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 8,
-    username: "user8",
-    password: "password8",
-    phone: "0823456789",
-    email: "user8@example.com",
-    fullName: "Nguyen Thi H",
-    gender: "Female",
-    dob: "1997-07-16",
-    statusUser: "Active",
-    createDate: "2024-04-11T00:00:00Z",
-    updateDate: "2024-04-11T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 9,
-    username: "user9",
-    password: "password9",
-    phone: "0934567890",
-    email: "user9@example.com",
-    fullName: "Pham Minh I",
-    gender: "Male",
-    dob: "1999-09-09",
-    statusUser: "Active",
-    createDate: "2024-01-15T00:00:00Z",
-    updateDate: "2024-01-15T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-  {
-    userId: 10,
-    username: "user10",
-    password: "password10",
-    phone: "0945678901",
-    email: "user10@example.com",
-    fullName: "Nguyen Thi J",
-    gender: "Female",
-    dob: "2000-02-22",
-    statusUser: "Inactive",
-    createDate: "2024-03-25T00:00:00Z",
-    updateDate: "2024-03-25T00:00:00Z",
-    homeTown: "Hà Nội",
-    role: {
-      roleId: 1,
-      roleName: "HR"
-    },
-    photo: "/src/assets/image-poster-banner/photo-test.png",
-  },
-]);
 const activeTemplate = ref(poster.postStyleId || "1");
 
 watch(activeTemplate, (val) => {
@@ -585,7 +394,7 @@ async function exportPng() {
 }
 
 .modal {
-  width: min(90vw, 930px);
+  width: min(90vw, 950px);
   background: #fff;
   color: black;
   border-radius: 16px;
@@ -676,7 +485,7 @@ async function exportPng() {
 
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 200px;
+  width: 250px;
 }
 
 .table th:nth-child(3),
@@ -691,7 +500,7 @@ async function exportPng() {
 
 .table th:nth-child(5),
 .table td:nth-child(5) {
-  width: 80px;
+  width: 90px;
 }
 
 .table th:nth-child(6),
