@@ -1,8 +1,8 @@
 scalar Upload
 
 enum PosterEnum {
-    HONOR
-    NEW_EMPLOYEE
+    honor,
+    new_employee,
 }
 
 type Poster {
@@ -19,6 +19,7 @@ type Poster {
     isDraft: Boolean
     isDeleted: Boolean
     user: User!
+    owner: User!
     posterReactions: [PosterReaction]
 }
 
@@ -26,6 +27,7 @@ type PosterDTO{
     posterId: ID!
     title: String!
     content: String!
+    posterType: PosterEnum
     companyName: String
     createDate: String
     updateDate: String
@@ -43,6 +45,7 @@ type PosterPage{
 
 input PosterCreateInput{
     userId: ID,
+    ownerId: ID,
     file: Upload,
     title: String,
     content: String,
@@ -52,4 +55,9 @@ input PosterCreateInput{
 
 extend type Mutation{
     createPoster(input: PosterCreateInput): PosterDTO
+}
+
+extend type Query {
+    postersForHR(page: Int!, size: Int!,search: String): PosterPage
+    postersForUser(search: String): [PosterDTO]
 }

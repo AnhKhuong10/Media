@@ -18,7 +18,9 @@ type User{
     password: String,
     email: String,
     fullName: String,
+    gender: GenderEnum
     dob: Date,
+    avatar: String,
     role: Role!
 }
 
@@ -30,6 +32,7 @@ type UserDTO{
     email: String,
     phone: String,
     dob: Date,
+    avatar: String,
     roleName: String
 }
 

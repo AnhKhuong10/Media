@@ -1,10 +1,12 @@
 package media.vn.module_poster.domain.dto.poster
 
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import media.vn.utils.constants.PosterEnum
 import org.springframework.web.multipart.MultipartFile
 
-data class PosterCreateInput(
+data class PosterUpdateInput(
+    val posterId: Long,
     val userId: Long,
     val ownerId: Long,
     val file: MultipartFile,

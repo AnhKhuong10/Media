@@ -10,7 +10,7 @@ data class PosterReaction(
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="poster_reaction_id")
-    val posterReactionId: Long,
+    val posterReactionId: Long = 0,
 
     @ManyToOne
     @JoinColumn(name = "poster_id")
@@ -22,4 +22,8 @@ data class PosterReaction(
 
     @Column(name = "created_at")
     val createDate: LocalDateTime,
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    val user: User,
     )
