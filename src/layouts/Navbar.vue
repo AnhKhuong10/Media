@@ -21,11 +21,11 @@
 </template>
 
 <script setup lang="ts">
-import InputText from 'primevue/inputtext'
+// import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import { ref } from 'vue'
 
-const search = ref('')
+// const search = ref('')
 </script>
 
 <style scoped>
