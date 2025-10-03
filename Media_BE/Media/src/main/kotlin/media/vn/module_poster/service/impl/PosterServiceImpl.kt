@@ -4,6 +4,7 @@ import media.vn.module_poster.domain.dto.poster.PosterCreateInput
 import media.vn.module_poster.domain.dto.poster.PosterDTO
 import media.vn.module_poster.domain.dto.poster.PosterUpdateInput
 import media.vn.module_poster.domain.entity.Poster
+import media.vn.module_poster.domain.entity.User
 import media.vn.module_poster.repository.PosterRepository
 import media.vn.module_poster.repository.UserRepository
 import media.vn.module_poster.service.PosterService
@@ -130,6 +131,22 @@ class PosterServiceImpl (
         createDate = this.createDate,
         updateDate = this.updateDate,
         createdBy = this.createdBy?:"",
-        updatedBy = this.updatedBy?:""
+        updatedBy = this.updatedBy?:"",
+        userPoster = this.user.toUserPoster()
     )
+
+    private fun User.toUserPoster(): PosterDTO.UserPoster {
+        return PosterDTO.UserPoster(
+            userId = this.userId,
+            username = this.username,
+            fullName = this.fullName,
+            gender = this.gender,
+            email = this.email,
+            phone = this.phone,
+            dob = this.dob,
+            avatar = this.avatar,
+            roleName = this.role.roleName
+        )
+    }
+
 }
