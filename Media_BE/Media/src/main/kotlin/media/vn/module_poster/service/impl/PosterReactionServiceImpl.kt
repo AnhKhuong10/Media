@@ -12,6 +12,7 @@ import media.vn.utils.exception.BusinessException
 import media.vn.utils.exception.ErrorCode
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 @Service
 class PosterReactionServiceImpl(
@@ -30,12 +31,14 @@ class PosterReactionServiceImpl(
 
         return if(existingsReaction != null){
             val updated = existingsReaction.copy(posterReaction = reaction)
+            updated.updateDate = OffsetDateTime.now()
             posterReactionRepository.save(updated)
         }else{
             val newReaction = PosterReaction(
                 poster = poster,
                 posterReaction = reaction,
-                createDate = LocalDateTime.now(),
+                createDate = OffsetDateTime.now(),
+                updateDate = OffsetDateTime.now(),
                 user = user
             )
             posterReactionRepository.save(newReaction)

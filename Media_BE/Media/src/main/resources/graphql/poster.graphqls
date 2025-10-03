@@ -23,6 +23,18 @@ type Poster {
     posterReactions: [PosterReaction]
 }
 
+type UserPoster{
+    userId: ID,
+    username: String,
+    fullName: String,
+    gender: GenderEnum,
+    email: String,
+    phone: String,
+    dob: Date,
+    avatar: String,
+    roleName: String
+}
+
 type PosterDTO{
     posterId: ID!
     title: String!
@@ -33,6 +45,7 @@ type PosterDTO{
     updateDate: String
     createdBy: String
     updatedBy: String
+    userPoster: UserPoster
 }
 
 type PosterPage{
@@ -42,6 +55,7 @@ type PosterPage{
     pageNumber: Int,
     pageSize: Int
 }
+
 
 input PosterCreateInput{
     userId: ID,
