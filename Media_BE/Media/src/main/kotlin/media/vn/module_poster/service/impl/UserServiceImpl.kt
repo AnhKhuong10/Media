@@ -57,6 +57,7 @@ class UserServiceImpl (
         email = this.email,
         phone = this.phone,
         dob = this.dob,
+        avatar = this.avatar,
         roleName = this.role.roleName
     )
 }

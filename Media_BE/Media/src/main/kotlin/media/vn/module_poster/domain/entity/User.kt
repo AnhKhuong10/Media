@@ -32,17 +32,20 @@ data class User(
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     var refreshToken: String? = null,
 
-
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     var gender: GenderEnum,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    var dob: LocalDate,
+
+    var avatar: String,
 
     @Column(name = "status_user")
     @Enumerated(EnumType.STRING)
     var statusUser: StatusUser,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    var dob: LocalDate,
+
 
     @ManyToOne @JoinColumn(name = "role_id")
     var role: Role,
