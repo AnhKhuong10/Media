@@ -29,6 +29,17 @@ export async function getAllPoster(
           updateDate
           createdBy
           updatedBy
+          user{
+           userId
+        username
+        fullName
+        gender
+        email
+        phone
+        dob
+        avatar
+        roleName
+          }
         }
         totalElements
         totalPages

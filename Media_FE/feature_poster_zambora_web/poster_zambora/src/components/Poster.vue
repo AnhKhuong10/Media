@@ -35,10 +35,11 @@
 import { defineProps, ref } from "vue";
 import type { PosterDTO } from "../model/poster"; // ✅ Dùng lại type đã có
 
-defineProps<{
+const props = defineProps<{
   poster: PosterDTO;
   index: number;
 }>();
+console.log("Poster item:", props.poster); // ✅ In dữ liệu mỗi dòng
 const activeMenu = ref<number | null>(null);
 function toggleMenu(posterId: number) {
   // Nếu menu đang mở thì đóng lại, ngược lại mở menu mới

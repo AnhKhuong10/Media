@@ -1,3 +1,5 @@
+import { GenderEnum } from "../user";
+
 export type Poster = {
   posterId: number;
   title: string;
@@ -11,7 +13,7 @@ export type Poster = {
   updatedBy?: string | null;
   isDraft: boolean;
   isDeleted: boolean;
-  userId: String;
+  userId: string;
 };
 
 export type PosterCreateDTO = {
@@ -19,19 +21,32 @@ export type PosterCreateDTO = {
   content: string;
   posterType: string;
   companyName: string;
-  userId: String;
+  userId: string;
 };
+
+export type UserPoster = {
+  userId: number,
+  username: string,
+  fullName: string,
+  gender: GenderEnum,
+  email: string,
+  phone: string,
+  dob: Date,
+  avatar: string,
+  roleName: string
+}
 
 export type PosterDTO = {
   posterId: number
-  title: String
-  content: String
-  companyName: String
+  title: string
+  content: string
+  companyName: string
   posterType: PosterType
-  createDate: String
-  updateDate: String
-  createdBy: String
-  updatedBy: String
+  createDate: string
+  updateDate: string
+  createdBy: string
+  updatedBy: string
+  user: UserPoster
 }
 
 export type PosterPage = {

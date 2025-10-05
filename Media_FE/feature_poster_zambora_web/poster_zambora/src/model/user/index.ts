@@ -18,3 +18,9 @@ export type User = {
     homeTown: string; // VARCHAR(255) - optional
     photo?: string; // TEXT - optional
 };
+
+export enum GenderEnum {
+    male,
+    female,
+    other
+}

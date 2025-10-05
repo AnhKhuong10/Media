@@ -14,18 +14,9 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input
-        v-model="q"
-        type="search"
-        class="input"
-        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
-      />
-      <label class="check"
-        ><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label
-      >
-      <label class="check"
-        ><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label
-      >
+      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…" />
+      <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
+      <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label>
       <select v-model="styleFilter" class="select">
         <option value="">Tất cả style</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
@@ -50,15 +41,8 @@
         </thead>
 
         <tbody>
-          <poster
-            v-for="(p, index) in posters"
-            :key="p.posterId"
-            :poster="p"
-            :index="index + 1"
-            @view="onView"
-            @edit="onEdit"
-            @delete="onDelete"
-          />
+          <poster v-for="(p, index) in posters" :key="p.posterId" :poster="p" :index="index + 1" @view="onView"
+            @edit="onEdit" @delete="onDelete" />
           <tr v-if="posters.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -77,11 +61,7 @@
       <button class="btn sm" :disabled="pageNumber === totalPages" @click="pageNumber++">
         ›
       </button>
-      <button
-        class="btn sm"
-        :disabled="pageNumber === totalPages"
-        @click="pageNumber = totalPages"
-      >
+      <button class="btn sm" :disabled="pageNumber === totalPages" @click="pageNumber = totalPages">
         »
       </button>
     </footer>
@@ -96,11 +76,10 @@
           <!-- Khung preview (tỉ lệ poster) -->
           <div class="poster-preview-shell">
             <div class="poster-preview-surface">
-              <component 
-              v-if="previewForm" 
-              :is="previewComponent"
-               :form="previewForm"
-               :preview-photo="previewPhoto" />
+              <component v-if="previewForm" 
+              :is="previewComponent" 
+              :form="previewForm" 
+              :preview-photo="previewPhoto" />
             </div>
           </div>
         </div>
@@ -156,7 +135,7 @@ function closePreview() {
   selectedPoster.value = null; // Xoá poster đang chọn
 }
 
-const previewPhoto = ref<string>(defaultLogo); 
+const previewPhoto = ref<string>(defaultLogo);
 const showStudio = ref(false); // bật/tắt modal PosterStudio
 const editingPoster = ref<Poster | null>(null); // dữ liệu poster đang edit
 
@@ -177,12 +156,12 @@ const previewComponent = computed(() => resolvePreviewComponent(selectedPoster.v
 const previewForm = computed(() => {
   const p = selectedPoster.value;
   if (!p) return null;
-
   return {
     posterType: resolvePreviewComponent(p) === PosterNewHire ? PosterType.new_employee : PosterType.honor,
-    title: p.title || "CHÀO MỪNG BẠN ĐẾN VỚI",
-    companyName: p.companyName || "TÊN CÔNG TY",
+    title: p.title,
+    companyName: p.companyName,
     logo: defaultLogo,
+    user: p.user,
   };
 });
 
@@ -226,6 +205,8 @@ function onCreate() {
 
 // Hàm onView sẽ gán formNewHire vào selectedPoster
 function onView(p: PosterDTO) {
+  console.log("Poster detail:", p); // ✅ log ra để xem toàn bộ object
+  previewPhoto.value =`http://localhost:8080${p.user.avatar}`
   selectedPoster.value = p; // gán poster đang chọn
   showPreview.value = true; // mở modal
 }
