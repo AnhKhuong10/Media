@@ -16,7 +16,7 @@
     <div class="medal">
       <!-- avatar lọt vòng -->
       <div class="medal-hole">
-        <img v-if="form.user.photo" :src="form.user.photo" class="medal-photo" />
+        <img v-if="form.user.avatar" :src="previewPhoto" class="medal-photo" />
         <div v-else class="medal-photo ph">Ảnh nhân viên</div>
       </div>
 
@@ -39,8 +39,11 @@
   </div>
 </template>
 
-<script setup>
-defineProps({ form: Object });
+<script setup lang="ts">
+const props = defineProps<{
+  form: any;            // hoặc Poster nếu có type
+  previewPhoto: string; // chú ý: đây là type TS, không phải biến
+}>();
 import logoNgoiSao from "@/assets/image-poster-banner/ngoi-sao.png";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { computed } from "vue";

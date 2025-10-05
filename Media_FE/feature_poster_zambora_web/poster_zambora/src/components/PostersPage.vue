@@ -3,7 +3,7 @@
     <div class="card-hd">Poster Studio</div>
     <div class="card-bd">
       <div class="toolbar" style="margin-bottom: 12px">
-        <button class="btn secondary" @click="saveDraft">Save Draft</button>
+        <button class="btn secondary" @click="save">Save</button>
         <button class="btn" @click="exportPng">Export PNG</button>
       </div>
 
@@ -15,7 +15,7 @@
             <div class="field">
               <div class="horizontal">
                 <label>Loại Poster</label>
-                <select class="select" v-model="activeTemplate" style="width: 50%;">
+                <select class="select" v-model="activeTemplate" style="width: 50%">
                   <option value="1">Nhân viên mới</option>
                   <option value="2">Vinh danh</option>
                 </select>
@@ -26,7 +26,8 @@
                 <label>Chọn nhân viên</label>
                 <div class="select-container">
                   <button @click="showModal = true" class="btn">
-                    <i class="pi pi-user"></i> <!-- Icon nhân viên -->
+                    <i class="pi pi-user"></i>
+                    <!-- Icon nhân viên -->
                   </button>
                 </div>
               </div>
@@ -36,17 +37,24 @@
                 <label>Chọn ảnh đại diện</label>
                 <div class="select-container">
                   <button @click="triggerFileUpload" class="btn">
-                    <i class="pi pi-upload"></i> <!-- Icon upload -->
+                    <i class="pi pi-upload"></i>
+                    <!-- Icon upload -->
                   </button>
                 </div>
-                <input type="file" id="fileInput" @change="handleFileUpload" style="display: none;" />
+                <input
+                  type="file"
+                  id="fileInput"
+                  @change="handleFileUpload"
+                  style="display: none"
+                />
               </div>
             </div>
             <!-- Checkbox: Chọn ảnh từ nhân viên -->
             <div class="field">
               <div class="horizontal">
                 <label>Chọn ảnh từ nhân viên</label>
-                <input type="radio" v-model="photoSource" value="default" /> <!-- Chọn ảnh từ nhân viên -->
+                <input type="radio" v-model="photoSource" value="default" />
+                <!-- Chọn ảnh từ nhân viên -->
               </div>
             </div>
 
@@ -54,18 +62,39 @@
             <div class="field">
               <div class="horizontal">
                 <label>Chọn ảnh từ máy</label>
-                <input type="radio" v-model="photoSource" value="uploaded" /> <!-- Chọn ảnh từ máy -->
+                <input type="radio" v-model="photoSource" value="uploaded" />
+                <!-- Chọn ảnh từ máy -->
               </div>
             </div>
 
             <div class="grid-2">
               <div class="field">
                 <label>Tiêu đề</label>
-                <input class="input" v-model="poster.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" />
+                <input
+                  class="input"
+                  v-model="poster.title"
+                  placeholder="CHÀO MỪNG BẠN ĐẾN VỚI"
+                />
               </div>
               <div class="field">
                 <label>Tên công ty</label>
-                <input class="input" v-model="poster.companyName" placeholder="REVOTECH" />
+                <input
+                  class="input"
+                  v-model="poster.companyName"
+                  placeholder="REVOTECH"
+                />
+              </div>
+            </div>
+
+            <div class="grid-4">
+              <div class="field">
+                <label>Nội dung</label>
+                <textarea
+                  class="input"
+                  v-model="poster.content"
+                  placeholder="NỘI DUNG Ở ĐÂY"
+                  rows="4"
+                ></textarea>
               </div>
             </div>
           </div>
@@ -74,7 +103,12 @@
         <!-- Panel phải: Stage poster -->
         <div class="poster-shell">
           <div class="poster-surface" id="exportTarget">
-            <component :is="currentPoster" :form="poster" :key="activeTemplate" />
+            <component
+              :is="currentPoster"
+              :form="poster"
+              :preview-photo="previewPhoto"
+              :key="activeTemplate"
+            />
           </div>
         </div>
       </div>
@@ -90,7 +124,12 @@
       <div class="modal-body">
         <!-- Thanh tìm kiếm -->
         <div class="horizontal">
-          <input type="text" v-model="searchQuery" placeholder="Tìm kiếm theo tên..." class="search-bar" />
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Tìm kiếm theo tên..."
+            class="search-bar"
+          />
           <div class="sort-buttons">
             <button @click="sortByDateAscending">Ngày vào nhỏ -> lớn</button>
             <button @click="sortByDateDescending">Ngày vào lớn -> nhỏ</button>
@@ -128,24 +167,45 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, watch,onMounted } from "vue";
-import { getAllUser } from "../api/graphql/user-service";
+import { reactive, ref, computed, watch, onMounted } from "vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
 
+const props = defineProps<{
+  posterData?: any; // dữ liệu truyền vào khi edit
+}>();
+const poster = reactive(
+  props.posterData
+    ? { ...props.posterData }
+    : {
+        posterType: "new_employee",
+        title: "CHÀO MỪNG BẠN ĐẾN VỚI",
+        content: "NỘI DUNG Ở ĐÂY",
+        companyName: "TÊN CÔNG TY",
+        user: {} as User,
+      }
+);
+const posterCreateDTO = computed(() => ({
+  title: poster.title,
+  content: poster.content ?? "",
+  posterType: poster.posterType,
+  companyName: poster.companyName,
+  userId: poster.user.userId,
+}));
+
 // Lấy danh sách user cho người dùng chọn trong modal
-const users = ref<User[]>([]);  
+import { getAllUser } from "../api/graphql/user-service";
+const users = ref<User[]>([]);
 const searchQuery = ref("");
 onMounted(async () => {
   users.value = await getAllUser();
-  console.log('Fetched users:', users.value);
+  console.log("Fetched users:", users.value);
 });
 function sortByDateAscending() {
   users.value.sort(
@@ -164,126 +224,109 @@ const filteredUsers = computed(() => {
 });
 // end Lấy danh sách user cho người dùng chọn trong modal
 
-
-const props = defineProps<{
-  posterData?: any;   // dữ liệu truyền vào khi edit
-}>();
-
-const photoSource = ref<'default' | 'uploaded'>('default');
+// Hàm lưu poster (gọi API)
+import { createPoster } from "../api/rest/poster-service";
+const uploadedFile = ref<File | null>(null);
+const photoSource = ref<"default" | "uploaded">("default");
 const uploadedPhoto = ref<string | null>(null);
 
-// Thay vì computed từ form.user.photo, dùng ref ổn định:
-const employeePhoto = ref<string>(defaultLogo);
-watch(photoSource, (val, oldVal) => {
-  console.log('[photoSource] change:', oldVal, '→', val);
-  ensureUser();
-
-  if (val === 'uploaded') {
-    if (uploadedPhoto.value) {
-      console.log('[apply] use uploadedPhoto =', uploadedPhoto.value.slice(0, 40));
-      poster.user.photo = uploadedPhoto.value;
-    } else {
-      console.log('[apply] chưa có uploadedPhoto, giữ nguyên');
-    }
-  } else {
-    console.log('[apply] use employeePhoto =', employeePhoto.value.slice(0, 40));
-    poster.user.photo = employeePhoto.value;
+async function save() {
+  if (!poster.user?.userId) {
+    alert("Vui lòng chọn nhân viên trước khi lưu Poster!");
+    return;
   }
-  console.log('[result] form.user.photo =', poster.user.photo?.slice?.(0, 40));
-});
-function ensureUser() {
-  if (!poster.user) {
-    poster.user = {} as User;
+
+  let fileToUpload: File | undefined;
+
+  // chỉ khi radio đang chọn "uploaded" và có file mới thì gửi
+  if (photoSource.value === "uploaded" && uploadedFile.value) {
+    fileToUpload = uploadedFile.value;
+  }
+
+  console.log("Payload gửi BE:", posterCreateDTO.value, "File:", fileToUpload);
+
+  const res = await createPoster(posterCreateDTO.value, fileToUpload);
+  if (res) {
+    alert("Lưu thành công Poster!");
   }
 }
+// end Hàm lưu poster (gọi API)
 
-const showModal = ref(false);
-function selectUser(user: User) {
-  poster.user = user;
-  // Lấy ảnh gốc của nhân viên, lưu vào biến riêng
-  employeePhoto.value = user.photo || defaultLogo;
-
-  // Đồng bộ ảnh hiển thị theo radio hiện tại
-  if (photoSource.value === 'default') {
-    poster.user.photo = employeePhoto.value;
-  } else {
-    poster.user.photo = uploadedPhoto.value ?? employeePhoto.value;
-  }
-  showModal.value = false;
-}
-
-const poster = reactive(
-  props.posterData
-    ? { ...props.posterData }   // Khi Edit thì load dữ liệu sẵn có
-    : {
-        posterType: "New Hire",       // Mặc định Nhân viên mới
-        title: "CHÀO MỪNG BẠN ĐẾN VỚI",
-        companyName: "TÊN CÔNG TY",
-        user: {} as User,
-      }
-);
-
-const activeTemplate = ref(poster.postStyleId || "1");
-
-watch(activeTemplate, (val) => {
-  poster.postStyleId = val;   // đồng bộ khi đổi select box
-});
-
-
-const currentPoster = computed(() =>
-  activeTemplate.value === "1" ? PosterNewHire : PosterRecognition
-);
-function triggerFileUpload() {
-  document.getElementById('fileInput')?.click(); // Gọi click cho input file ẩn
-}
-// Phương thức để chọn ảnh từ máy
+// hàm chọn file từ máy
 function handleFileUpload(e: Event) {
   const input = e.currentTarget as HTMLInputElement | null;
   const file = input?.files?.[0];
   if (!file) return;
 
-  if (!file.type.startsWith('image/')) {
-    alert('Vui lòng chọn file ảnh hợp lệ.');
-    if (input) input.value = '';
+  if (!file.type.startsWith("image/")) {
+    alert("Vui lòng chọn file ảnh hợp lệ.");
+    if (input) input.value = "";
     return;
   }
 
+  uploadedFile.value = file; // giữ file thật
+
   const reader = new FileReader();
   reader.onload = () => {
-    // 1) LƯU RIÊNG ẢNH UPLOAD
-    uploadedPhoto.value = reader.result as string;
-
-    // 2) Nếu đang chọn nguồn "uploaded" thì áp ngay vào form để hiển thị
-    ensureUser();
-    if (photoSource.value === 'uploaded') {
-      poster.user.photo = uploadedPhoto.value!;
+    uploadedPhoto.value = reader.result as string; // để preview
+    if (photoSource.value === "uploaded") {
+      previewPhoto.value = uploadedPhoto.value;
     }
-
-    if (input) input.value = ''; // cho phép chọn lại cùng file
+    if (input) input.value = "";
   };
-  reader.onerror = () => {
-    console.error('[upload] read error:', reader.error);
-    if (input) input.value = '';
-  };
-
-  reader.readAsDataURL(file); // đọc thành dataURL (base64)
+  reader.readAsDataURL(file);
 }
+// end hàm chọn file từ máy
 
-function saveDraft() {
-  localStorage.setItem(
-    `poster-draft-${activeTemplate.value}`,
-    JSON.stringify(poster)
-  );
-  alert("Đã lưu nháp!");
+
+// Thay vì computed từ form.user.photo, dùng ref ổn định:
+const employeePhoto = ref<string>(defaultLogo);
+watch(photoSource, (val) => {
+  if (val === "uploaded" && uploadedPhoto.value) {
+    previewPhoto.value = uploadedPhoto.value;
+  } else {
+    previewPhoto.value = employeePhoto.value;
+  }
+});
+
+const showModal = ref(false);
+const previewPhoto = ref<string>(defaultLogo); // ảnh hiển thị
+
+function selectUser(user: User) {
+  poster.user = user;
+  poster.userId = user.userId;
+
+  // lấy ảnh gốc từ DB (nếu có)
+  employeePhoto.value = user.avatar ? `http://localhost:8080${user.avatar}` : defaultLogo;
+
+  // preview theo radio
+  previewPhoto.value =
+    photoSource.value === "uploaded" && uploadedPhoto.value
+      ? uploadedPhoto.value
+      : employeePhoto.value;
+
+  showModal.value = false;
+}
+const activeTemplate = ref(poster.postStyleId || "1");
+
+watch(activeTemplate, (val) => {
+  poster.postStyleId = val; // đồng bộ khi đổi select box
+});
+
+const currentPoster = computed(() =>
+  activeTemplate.value === "1" ? PosterNewHire : PosterRecognition
+);
+function triggerFileUpload() {
+  document.getElementById("fileInput")?.click(); // Gọi click cho input file ẩn
 }
 function formatDate(date: string | undefined) {
   if (!date) {
-    return ''; // Trả về chuỗi rỗng nếu date là undefined hoặc null
+    return ""; // Trả về chuỗi rỗng nếu date là undefined hoặc null
   }
 
   const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
 
   return `${day}/${month}/${year}`;
@@ -293,7 +336,7 @@ async function exportPng() {
   const el = document.getElementById("exportTarget");
   if (!el) {
     console.error("Element with ID 'exportTarget' not found.");
-    return;  // Nếu không có phần tử, thoát khỏi hàm
+    return; // Nếu không có phần tử, thoát khỏi hàm
   }
 
   // Nếu phần tử tồn tại, tiếp tục với việc vẽ canvas
@@ -302,7 +345,7 @@ async function exportPng() {
   const a = document.createElement("a");
   a.download = `${activeTemplate.value}-${poster.user.fullName || "poster"}.png`;
   a.href = canvas.toDataURL("image/png");
-  a.click();  // Tạo một click tự động để tải ảnh
+  a.click(); // Tạo một click tự động để tải ảnh
 }
 </script>
 

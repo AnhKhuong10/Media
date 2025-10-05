@@ -7,7 +7,7 @@
       <img src="@/assets/image-poster-banner/gold-stroke.jpg" alt="gold stroke" class="gold-stroke" />
     </div>
     <div style="display: flex; justify-content: center; margin-top: -250px">
-      <img v-if="form.user.avatar" :src="`http://localhost:8080${form.user.avatar}`" class="photo" />
+      <img v-if="form.user.avatar" :src="previewPhoto" class="photo" />
       <div v-else class="photo ph">Ảnh nhân viên</div>
     </div>
 
@@ -24,10 +24,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
-defineProps({ form: Object });
-function formatDate(date) {
+const props = defineProps<{
+  form: any;            // hoặc Poster nếu có type
+  previewPhoto: string; // chú ý: đây là type TS, không phải biến
+}>();
+function formatDate(date: string) {
   if (!date) {
     return ""; // Trả về chuỗi rỗng nếu date là undefined hoặc null
   }

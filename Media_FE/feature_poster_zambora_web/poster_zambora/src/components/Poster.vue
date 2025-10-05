@@ -4,10 +4,10 @@
     <td class="content">{{ poster.posterId }}</td>
     <td class="content">{{ poster.title }}</td>
     <td class="content">{{ poster.content }}</td>
-    <td class="content">{{ poster.createdAt }}</td>
+    <td class="content">{{ poster.createDate }}</td>
     <td class="content">{{ poster.createdBy }}</td>
-    <td class="content">{{ poster.isDraft ? "Yes" : "No" }}</td>
-    <td class="content">{{ poster.postStyleId }}</td>
+    <td class="content">"No"</td>
+    <td class="content">{{ poster.posterType }}</td>
     <td class="content">
       <div class="dropdown">
         <!-- Dấu ba chấm dọc -->
@@ -33,14 +33,14 @@
 
 <script setup lang="ts">
 import { defineProps, ref } from "vue";
-import type { Poster } from "../model/poster"; // ✅ Dùng lại type đã có
+import type { PosterDTO } from "../model/poster"; // ✅ Dùng lại type đã có
 
 defineProps<{
-  poster: Poster;
+  poster: PosterDTO;
   index: number;
 }>();
-const activeMenu = ref<string | null>(null);
-function toggleMenu(posterId: string) {
+const activeMenu = ref<number | null>(null);
+function toggleMenu(posterId: number) {
   // Nếu menu đang mở thì đóng lại, ngược lại mở menu mới
   activeMenu.value = activeMenu.value === posterId ? null : posterId;
 }

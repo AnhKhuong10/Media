@@ -22,6 +22,7 @@ class PosterController(
     @ApiMessage("Create a new Poster")
     fun createPoster(@ModelAttribute @Valid input: PosterCreateInput)
     : ResponseEntity<PosterDTO> {
+        println("POSTER CREATED")
         val poster = posterService.createPoster(input)
         return ResponseEntity.status(HttpStatus.CREATED).body(poster)
     }

@@ -8,6 +8,8 @@ import media.vn.module_poster.repository.UserRepository
 import media.vn.module_poster.service.PosterService
 import media.vn.utils.exception.BusinessException
 import media.vn.utils.exception.ErrorCode
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -42,6 +44,7 @@ class PosterServiceImpl (
             val fileName = UUID.randomUUID().toString() + "_" + file.originalFilename
             val target = uploadDir.resolve(fileName)
             Files.copy(file.inputStream, target, StandardCopyOption.REPLACE_EXISTING)
+            println("file save at: $target")
             filePath = "/images/$fileName"
         }
 
@@ -62,6 +65,17 @@ class PosterServiceImpl (
         )
 
         return posterRepository.save(poster).toPosterDTO()
+    }
+
+    override fun getPagePosterForHr(search: String?, page: Pageable): Page<PosterDTO> {
+        val posters = posterRepository.getListPoster(search, page)
+
+        return posters.map { it.toPosterDTO() }
+    }
+
+    override fun getPagePosterForUser(search: String?): List<PosterDTO> {
+        val posters = posterRepository.getListPoster(search, Pageable.unpaged()).content
+        return posters.map { it.toPosterDTO() }
     }
 
     private fun Poster.toPosterDTO()= PosterDTO (

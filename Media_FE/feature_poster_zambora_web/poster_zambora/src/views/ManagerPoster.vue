@@ -4,7 +4,7 @@
     <header class="card-hd">
       <div class="hd-left">
         <h2>Danh sách Poster</h2>
-        <span class="muted">{{ total }} bản ghi</span>
+        <span class="muted">{{ totalElements }} bản ghi</span>
       </div>
       <div class="hd-right">
         <button class="btn primary" @click="onCreate">Tạo mới</button>
@@ -44,14 +44,14 @@
             <th>Created at</th>
             <th>Created By</th>
             <th>Draft</th>
-            <th>Style</th>
+            <th>Type</th>
             <th></th>
           </tr>
         </thead>
 
         <tbody>
           <poster
-            v-for="(p, index) in paginated"
+            v-for="(p, index) in posters"
             :key="p.posterId"
             :poster="p"
             :index="index + 1"
@@ -59,7 +59,7 @@
             @edit="onEdit"
             @delete="onDelete"
           />
-          <tr v-if="paginated.length === 0">
+          <tr v-if="posters.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
         </tbody>
@@ -69,11 +69,19 @@
     <!-- Pagination -->
     <footer class="pager">
       <div class="spacer"></div>
-      <button class="btn sm" :disabled="page === 1" @click="page = 1">«</button>
-      <button class="btn sm" :disabled="page === 1" @click="page--">‹</button>
-      <span class="muted">Trang {{ page }} / {{ totalPages }}</span>
-      <button class="btn sm" :disabled="page === totalPages" @click="page++">›</button>
-      <button class="btn sm" :disabled="page === totalPages" @click="page = totalPages">
+      <button class="btn sm" :disabled="pageNumber === 1" @click="pageNumber = 1">
+        «
+      </button>
+      <button class="btn sm" :disabled="pageNumber === 1" @click="pageNumber--">‹</button>
+      <span class="muted">Trang {{ pageNumber }} / {{ totalPages }}</span>
+      <button class="btn sm" :disabled="pageNumber === totalPages" @click="pageNumber++">
+        ›
+      </button>
+      <button
+        class="btn sm"
+        :disabled="pageNumber === totalPages"
+        @click="pageNumber = totalPages"
+      >
         »
       </button>
     </footer>
@@ -88,7 +96,11 @@
           <!-- Khung preview (tỉ lệ poster) -->
           <div class="poster-preview-shell">
             <div class="poster-preview-surface">
-              <component v-if="previewForm" :is="previewComponent" :form="previewForm" />
+              <component 
+              v-if="previewForm" 
+              :is="previewComponent"
+               :form="previewForm"
+               :preview-photo="previewPhoto" />
             </div>
           </div>
         </div>
@@ -110,32 +122,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted } from "vue";
 import poster from "../components/Poster.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import PostersPage from "../components/PostersPage.vue";
-import type { Poster } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
-import type { User } from "../model/user"; // nếu chưa có, xem chú thích ở cuối
-import type { Role } from "../model/role";
+import type { Poster, PosterDTO, PosterPage } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
+
+// lấy danh sách poster
+import { getAllPoster } from "../api/graphql/poster-service-graphql";
+import { PosterType } from "../model/poster";
+const pageNumber = ref(0);
+const pageSize = ref(5);
+const search = ref("");
+const totalPages = ref(0);
+const totalElements = ref(0);
+const posters = ref<PosterDTO[]>([]);
+onMounted(async () => {
+  const posterPage: PosterPage = await getAllPoster(pageNumber.value, pageSize.value, "");
+  // gán content vào posters
+  posters.value = posterPage.content;
+  totalPages.value = posterPage.totalPages;
+  totalElements.value = posterPage.totalElements;
+  pageNumber.value = posterPage.pageNumber;
+  pageSize.value = posterPage.pageSize;
+  console.log("list poster", posterPage.content);
+});
+// end
 
 function closePreview() {
   showPreview.value = false; // Ẩn modal
   selectedPoster.value = null; // Xoá poster đang chọn
 }
 
+const previewPhoto = ref<string>(defaultLogo); 
 const showStudio = ref(false); // bật/tắt modal PosterStudio
 const editingPoster = ref<Poster | null>(null); // dữ liệu poster đang edit
 
 const showPreview = ref(false);
-const selectedPoster = ref<Poster | null>(null);
-function resolvePreviewComponent(p?: Poster | null) {
+const selectedPoster = ref<PosterDTO | null>(null);
+function resolvePreviewComponent(p?: PosterDTO | null) {
   if (!p) return PosterNewHire;
 
-  const type = (p.posterType || "").toLowerCase();
-  if (type === "1") return PosterNewHire;
-  if (type === "2") return PosterRecognition;
+  const type = p.posterType || "";
+  if (type === PosterType.new_employee.toString()) return PosterNewHire;
+  if (type === PosterType.honor.toString()) return PosterRecognition;
 
   return PosterNewHire; // fallback
 }
@@ -147,72 +179,12 @@ const previewForm = computed(() => {
   if (!p) return null;
 
   return {
-    postStyleId: resolvePreviewComponent(p) === PosterNewHire ? "1" : "2",
+    posterType: resolvePreviewComponent(p) === PosterNewHire ? PosterType.new_employee : PosterType.honor,
     title: p.title || "CHÀO MỪNG BẠN ĐẾN VỚI",
     companyName: p.companyName || "TÊN CÔNG TY",
-    user: p.user,
     logo: defaultLogo,
   };
 });
-
-// demo role
-const roleDemo: Role = {
-  roleId: 1, // Chỉ số vai trò (Role ID)
-  roleName: "Tester", // Tên vai trò
-};
-// demo user
-const userDemo: User = {
-  userId: 1,
-  username: "user1",
-  password: "password1",
-  phone: "0123456789",
-  email: "user1@example.com",
-  fullName: "Nguyen Van A",
-  gender: "Male",
-  dob: "1990-01-01",
-  statusUser: "Active",
-  createDate: "2024-01-01T00:00:00Z",
-  updateDate: "2024-01-01T00:00:00Z",
-  homeTown: "Hà Nội",
-  role: {
-    roleId: 1,
-    roleName: "HR",
-  },
-  photo: "/src/assets/image-poster-banner/photo-test.png",
-};
-// seed demo
-const posters: Poster[] = [
-  {
-    posterId: 1,
-    title: "CHÀO MỪNG BẠN ĐẾN VỚI",
-    content: "Chào mừng bạn đến với công ty!",
-    filePath: "/images/p001.png",
-    createDate: "2025-09-01",
-    updateDate: "2025-09-02",
-    createdBy: "Admin",
-    updatedBy: "Admin",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    companyName: "Revotech",
-    posterType: "New Hire",
-  },
-  {
-    posterId: 2,
-    title: "Vinh danh",
-    content: "Vinh danh nhân viên xuất sắc tháng 9!",
-    filePath: "/images/p002.png",
-    createDate: "2025-09-05",
-    updateDate: "2025-09-06",
-    createdBy: "Manager1",
-    updatedBy: "Manager1",
-    isDraft: false,
-    isDeleted: false,
-    user: userDemo,
-    companyName: "Công ty XYZ",
-    posterType: "Recognition",
-  },
-];
 
 // search & filters
 const q = ref("");
@@ -220,32 +192,32 @@ const draftOnly = ref(false);
 const deletedOnly = ref(false);
 const styleFilter = ref<string>("");
 
-const styleOptions = Array.from(new Set(posters.map((p) => p.posterType)));
+const styleOptions = Array.from(new Set(posters.value.map((p) => p.posterType)));
 
-const filtered = computed(() => {
-  const kw = q.value.trim().toLowerCase();
-  return posters.filter((p) => {
-    if (draftOnly.value && !p.isDraft) return false;
-    if (deletedOnly.value && !p.isDeleted) return false;
-    if (styleFilter.value && p.postStyleId !== styleFilter.value) return false;
-    if (!kw) return true;
-    return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.user]
-      .join(" ")
-      .toLowerCase()
-      .includes(kw);
-  });
-});
+// const filtered = computed(() => {
+//   const kw = q.value.trim().toLowerCase();
+//   return posters.filter((p) => {
+//     if (draftOnly.value && !p.isDraft) return false;
+//     if (deletedOnly.value && !p.isDeleted) return false;
+//     if (styleFilter.value && p.postStyleId !== styleFilter.value) return false;
+//     if (!kw) return true;
+//     return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.user]
+//       .join(" ")
+//       .toLowerCase()
+//       .includes(kw);
+//   });
+// });
 
 // pagination
-const page = ref(1);
-const pageSize = ref(13);
-const total = computed(() => filtered.value.length);
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
-const paginated = computed(() => {
-  if (page.value > totalPages.value) page.value = totalPages.value;
-  const start = (page.value - 1) * pageSize.value;
-  return filtered.value.slice(start, start + pageSize.value);
-});
+// const page = ref(1);
+// const pageSize = ref(13);
+// const total = computed(() => filtered.value.length);
+// const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
+// const paginated = computed(() => {
+//   if (page.value > totalPages.value) page.value = totalPages.value;
+//   const start = (page.value - 1) * pageSize.value;
+//   return filtered.value.slice(start, start + pageSize.value);
+// });
 
 // actions (stub)
 function onCreate() {
@@ -253,7 +225,7 @@ function onCreate() {
 }
 
 // Hàm onView sẽ gán formNewHire vào selectedPoster
-function onView(p: Poster) {
+function onView(p: PosterDTO) {
   selectedPoster.value = p; // gán poster đang chọn
   showPreview.value = true; // mở modal
 }
