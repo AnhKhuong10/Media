@@ -45,8 +45,6 @@ data class User(
     @Enumerated(EnumType.STRING)
     var statusUser: StatusUser,
 
-
-
     @ManyToOne @JoinColumn(name = "role_id")
     var role: Role,
 

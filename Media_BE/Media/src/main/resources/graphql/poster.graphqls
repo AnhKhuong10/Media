@@ -36,20 +36,20 @@ type UserPoster{
 }
 
 type PosterDTO{
-    posterId: ID!
-    title: String!
-    content: String!
+    posterId: ID
+    title: String
+    content: String
     posterType: PosterEnum
     companyName: String
     createDate: String
     updateDate: String
     createdBy: String
     updatedBy: String
-    userPoster: UserPoster
+    user: UserPoster
 }
 
 type PosterPage{
-    content: [PosterDTO]!,
+    content: [PosterDTO],
     totalPages: Int,
     totalElements: Int,
     pageNumber: Int,
