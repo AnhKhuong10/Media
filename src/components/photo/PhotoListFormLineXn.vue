@@ -48,7 +48,7 @@ const localFavorites = ref([])
 const localTrash = ref([])
 const dragFileStatus = ref(false)
 
-// 🧠 Khi mount, đọc cả 2 storage
+// 🧠 Khi mount, đọc dữ liệu từ localStorage
 onMounted(() => {
   const photos = localStorage.getItem(STORAGE_PHOTOS)
   const favorites = localStorage.getItem(STORAGE_FAVORITES)
@@ -71,6 +71,7 @@ const displayedPhotos = computed(() => {
   }
 })
 
+// 💾 Lưu dữ liệu
 function saveAll() {
   localStorage.setItem(STORAGE_PHOTOS, JSON.stringify(localPhotos.value))
 }
@@ -79,7 +80,7 @@ function saveFavorites() {
   localStorage.setItem(STORAGE_TRASH, JSON.stringify(localTrash.value))
 }
 
-// 🗑️ Xoá ảnh
+// 🗑️ Xóa ảnh
 function handleDeletePhoto(photo) {
   // Chuyển sang thùng rác
   localTrash.value.unshift(photo)
@@ -88,8 +89,11 @@ function handleDeletePhoto(photo) {
   localPhotos.value = localPhotos.value.filter(p => p.id !== photo.id)
   localFavorites.value = localFavorites.value.filter(p => p.id !== photo.id)
   saveAll()
+  saveFavorites()
+  window.dispatchEvent(new Event('photos-updated'))
 }
 
+// ♻️ Khôi phục ảnh
 function handleRestorePhoto(photo) {
   // Reset liked = false khi khôi phục
   const restoredPhoto = { ...photo, liked: false }
@@ -102,8 +106,11 @@ function handleRestorePhoto(photo) {
   localTrash.value = localTrash.value.filter(p => p.id !== photo.id)
   localFavorites.value = localFavorites.value.filter(f => f.id !== photo.id)
   saveAll()
+  saveFavorites()
+  window.dispatchEvent(new Event('photos-updated'))
 }
 
+// 💖 Yêu thích / Bỏ yêu thích
 function handleToggleFavorite(photo) {
   const p = localPhotos.value.find(p => p.id === photo.id)
   if (p) p.liked = !p.liked
@@ -116,7 +123,10 @@ function handleToggleFavorite(photo) {
     // bỏ khỏi Favorites
     localFavorites.value = localFavorites.value.filter(f => f.id !== photo.id)
   }
+
   saveAll()
+  saveFavorites()
+  window.dispatchEvent(new Event('photos-updated')) // 🔔 Cập nhật Favorites.vue ngay
 }
 
 // 📤 Kéo thả ảnh
@@ -134,6 +144,7 @@ function handleDrop(e) {
       }
       localPhotos.value.unshift(newPhoto)
       saveAll()
+      window.dispatchEvent(new Event('photos-updated'))
     }
     reader.readAsDataURL(file)
   })

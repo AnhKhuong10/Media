@@ -40,15 +40,17 @@ function restorePhoto(photo) {
   // Xóa ảnh cũ (nếu tồn tại trong danh sách chính)
   photos.value = photos.value.filter(p => p.id !== photo.id)
 
-  // ✅ Thêm lại ảnh, reset trạng thái yêu thích (liked)
+  // ✅ Giữ nguyên trạng thái yêu thích (không reset liked)
   photos.value.unshift({
     ...photo,
-    deletedAt: null,
-    liked: false // 💖 Đặt lại không yêu thích sau khi khôi phục
+    deletedAt: null
   })
 
   saveAll()
   alert(`Đã khôi phục ảnh "${photo.name}"`)
+
+  // 🔁 Báo cho các trang khác (Favorites.vue) cập nhật
+  window.dispatchEvent(new Event('storage'))
 }
 
 // ❌ Xóa vĩnh viễn
@@ -56,6 +58,7 @@ function deleteForever(photo) {
   if (confirm(`Bạn có chắc muốn xóa vĩnh viễn "${photo.name}"?`)) {
     trash.value = trash.value.filter(p => p.id !== photo.id)
     saveAll()
+    window.dispatchEvent(new Event('storage')) // cập nhật luôn
   }
 }
 

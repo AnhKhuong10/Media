@@ -12,17 +12,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import PhotoListFormLineXn from '../components/photo/PhotoListFormLineXn.vue'
 
-// Dữ liệu chung của toàn app
-const allPhotos = JSON.parse(localStorage.getItem('my_photos_gallery') || '[]')
-
-// ⚡️ favorites chỉ là “bản copy tĩnh” khi trang này load
+const STORAGE_PHOTOS = 'my_photos_gallery'
 const favorites = ref([])
 
+function loadFavorites() {
+  const allPhotos = JSON.parse(localStorage.getItem(STORAGE_PHOTOS) || '[]')
+  favorites.value = allPhotos.filter(p => p.liked)
+}
+
 onMounted(() => {
-  favorites.value = allPhotos.filter(p => p.liked).map(p => ({ ...p })) // tạo bản sao, không reactive
+  loadFavorites()
+
+  // 🔁 Lắng nghe cả hai loại sự kiện
+  window.addEventListener('storage', loadFavorites)
+  window.addEventListener('photos-updated', loadFavorites)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', loadFavorites)
+  window.removeEventListener('photos-updated', loadFavorites)
 })
 </script>
 
