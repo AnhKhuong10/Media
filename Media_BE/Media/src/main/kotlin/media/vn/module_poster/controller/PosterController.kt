@@ -3,6 +3,7 @@ package media.vn.module_poster.controller
 import jakarta.validation.Valid
 import media.vn.module_poster.domain.dto.poster.PosterCreateInput
 import media.vn.module_poster.domain.dto.poster.PosterDTO
+import media.vn.module_poster.domain.dto.poster.PosterUpdateInput
 import media.vn.module_poster.service.PosterService
 import media.vn.utils.annotation.ApiMessage
 import org.springframework.http.HttpStatus
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
@@ -22,8 +24,15 @@ class PosterController(
     @ApiMessage("Create a new Poster")
     fun createPoster(@ModelAttribute @Valid input: PosterCreateInput)
     : ResponseEntity<PosterDTO> {
-        println("POSTER CREATED")
         val poster = posterService.createPoster(input)
         return ResponseEntity.status(HttpStatus.CREATED).body(poster)
+    }
+
+    @PutMapping
+    @ApiMessage("Update Poster")
+    fun updatePoster(@ModelAttribute @Valid input: PosterUpdateInput): ResponseEntity<PosterDTO> {
+        println("update")
+        val poster = posterService.updatePoster(input)
+        return ResponseEntity.status(HttpStatus.OK).body(poster)
     }
 }

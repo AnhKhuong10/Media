@@ -18,7 +18,10 @@ type User{
     password: String,
     email: String,
     fullName: String,
+    gender: GenderEnum
     dob: Date,
+    homeTown: String,
+    avatar: String,
     role: Role!
 }
 
@@ -30,10 +33,11 @@ type UserDTO{
     email: String,
     phone: String,
     dob: Date,
+    homeTown: String,
+    createDate: Date,
+    updateDate: Date,
+    avatar: String,
     roleName: String
-    homeTown: String
-    createDate: Date
-    avatar: String
 }
 
 type UserPage {

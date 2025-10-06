@@ -11,8 +11,9 @@ data class UserDTO(
     val email: String,
     val phone: String,
     val dob: LocalDate?,
-    val roleName: String,
-    val homeTown: String?,
-    val createDate: LocalDate?,
-     val avatar: String?,
+    val homeTown: String,
+    val avatar: String,
+    val createDate: LocalDate,
+    val updateDate: LocalDate,
+    val roleName: String
 )

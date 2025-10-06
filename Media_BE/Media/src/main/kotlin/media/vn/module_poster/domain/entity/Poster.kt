@@ -12,31 +12,44 @@ data class Poster(
     @Column(name = "poster_id")
     val posterId: Long = 0,
 
-    val title: String,
-    val content: String,
+    var title: String,
+    var content: String,
 
     @Column(name = "file_path")
-    val filePath: String?,
+    var filePath: String?,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "poster_type")
-    val posterType: PosterEnum,
+    var posterType: PosterEnum,
 
+    @Column(name = "company_name")
     var companyName: String,
-    val createDate: LocalDate = LocalDate.now(),
-    val updateDate: LocalDate?,
+
+    @Column(name = "create_date")
+    var createDate: LocalDate = LocalDate.now(),
+
+    @Column(name = "update_date")
+    var updateDate: LocalDate?,
+
+    @Column(name = "created_by")
     val createdBy: String?,
-    val updatedBy: String?,
+
+    @Column(name = "updated_by")
+    var updatedBy: String?,
 
     @Column(name = "is_draft")
-    val isDraft: Boolean = false,
+    var isDraft: Boolean = false,
 
     @Column(name = "is_deleted")
     val isDeleted: Boolean = false,
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    val user: User,
+    var user: User,
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    var owner: User,
 
     @OneToMany(mappedBy = "poster", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var posterReactions: List<PosterReaction>? = null

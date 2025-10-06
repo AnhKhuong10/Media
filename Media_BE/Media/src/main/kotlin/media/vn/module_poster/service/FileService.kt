@@ -5,6 +5,8 @@ import org.springframework.web.multipart.MultipartFile
 
 interface FileService {
 
+    fun createDirectory(folder: String)
+
     fun store(multipartFile: MultipartFile, folder: String): String
 
     fun getFileLength(fileName: String, folder: String): Long

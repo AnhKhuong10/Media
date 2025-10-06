@@ -23,5 +23,4 @@ interface PosterRepository : JpaRepository<Poster, Long> {
         @Param("search") search: String?,
         pageable: Pageable
     ): Page<Poster>
-
 }

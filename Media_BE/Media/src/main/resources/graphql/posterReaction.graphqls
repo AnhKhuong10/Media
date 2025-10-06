@@ -1,3 +1,5 @@
+scalar DateTime
+
 enum ReactionEnum {
     like,
     love,
@@ -9,6 +11,32 @@ enum ReactionEnum {
 
 type PosterReaction {
     posterReactionId: ID!
-    posterReaction: ReactionEnum!
     poster: Poster,
+    posterReaction: ReactionEnum!
+    createDate: DateTime
+    user: User
+}
+
+type PosterReactionDTO{
+    posterReactionId: ID!
+    posterId: ID,
+    username: String,
+    avatar: String,
+    reaction: ReactionEnum!
+    createDate: DateTime
+}
+
+type ReactionSummaryDTO {
+    reaction: ReactionEnum!
+    count: Int!
+}
+
+extend type Query {
+    countReactions(posterId: ID!, reaction: ReactionEnum): Int
+    getReactionsForPoster(posterId: ID!): [PosterReactionDTO]
+    getReactionSummary(posterId: ID!): [ReactionSummaryDTO]
+}
+
+extend type Mutation {
+    reactionPoster(userId: ID, posterId: ID, reaction: ReactionEnum): PosterReaction
 }

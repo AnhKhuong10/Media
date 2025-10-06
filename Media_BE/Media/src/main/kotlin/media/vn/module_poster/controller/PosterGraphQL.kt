@@ -13,23 +13,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.multipart.MultipartFile
 
 @Controller
-class PosterMutation(
-    private val posterService: PosterService
-): GraphQLMutationResolver {
-
-    fun createPoster(@Argument input: PosterCreateInput): PosterDTO {
-        val file: MultipartFile? = input.file
-
-        println("Upload file: ${file?.originalFilename}")
-
-        file?.let {
-            val path = "uploads/${it.originalFilename}"
-            it.transferTo(java.io.File(path))
-        }
-
-        return posterService.createPoster(input)
-    }
-
+class PosterQuery(
+    val posterService: PosterService
+){
     @QueryMapping
     fun postersForHR(
         @Argument page: Int,
@@ -54,6 +40,4 @@ class PosterMutation(
         val result = posterService.getPagePosterForUser(search)
         return result
     }
-
-
 }

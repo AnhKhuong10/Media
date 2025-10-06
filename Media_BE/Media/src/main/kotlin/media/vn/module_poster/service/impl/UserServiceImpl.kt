@@ -57,9 +57,10 @@ class UserServiceImpl (
         email = this.email,
         phone = this.phone,
         dob = this.dob,
-        roleName = this.role.roleName,
         homeTown = this.homeTown,
-        createDate = this.createDate,
         avatar = this.avatar,
+        createDate = this.createDate,
+        updateDate = this.updateDate,
+        roleName = this.role.roleName
     )
 }

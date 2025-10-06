@@ -32,25 +32,27 @@ data class User(
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     var refreshToken: String? = null,
 
-    @Column(name = "home_town")
-    var homeTown: String? = null,
-
-    @Column(name = "create_date")
-    var createDate: LocalDate? = null,
-
-    @Column(name = "avatar")
-    var avatar: String? = null,
-
     @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     var gender: GenderEnum,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    var dob: LocalDate,
+
+    var avatar: String,
 
     @Column(name = "status_user")
     @Enumerated(EnumType.STRING)
     var statusUser: StatusUser,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    var dob: LocalDate,
+    @Column(name = "create_date")
+    var createDate: LocalDate,
+
+    @Column(name = "update_date")
+    var updateDate: LocalDate,
+
+    @Column(name = "home_town")
+    var homeTown: String,
 
     @ManyToOne @JoinColumn(name = "role_id")
     var role: Role,
