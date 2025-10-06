@@ -26,6 +26,7 @@ export async function getAllPoster(
           updateDate
           createdBy
           updatedBy
+          isDraft
           user{
           userId
         fullName

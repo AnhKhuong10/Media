@@ -4,7 +4,7 @@
     <div class="card-bd">
       <div class="toolbar" style="margin-bottom: 12px">
         <template v-if="mode === 'create'">
-          <SaveButton label="Save" icon="pi pi-save" @click="save(false)" />
+          <SaveButton label="Save" icon="pi pi-save" @click="save()" />
           <ExportButton @click="exportPng" />
         </template>
         <template v-else>
@@ -46,12 +46,7 @@
                     <!-- Icon upload -->
                   </button>
                 </div>
-                <input
-                  type="file"
-                  id="fileInput"
-                  @change="handleFileUpload"
-                  style="display: none"
-                />
+                <input type="file" id="fileInput" @change="handleFileUpload" style="display: none" />
               </div>
             </div>
             <!-- Checkbox: Chọn ảnh từ nhân viên -->
@@ -87,31 +82,18 @@
             <div class="grid-2">
               <div class="field">
                 <label>Tiêu đề</label>
-                <input
-                  class="input"
-                  v-model="poster.title"
-                  placeholder="CHÀO MỪNG BẠN ĐẾN VỚI"
-                />
+                <input class="input" v-model="poster.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" />
               </div>
               <div class="field">
                 <label>Tên công ty</label>
-                <input
-                  class="input"
-                  v-model="poster.companyName"
-                  placeholder="REVOTECH"
-                />
+                <input class="input" v-model="poster.companyName" placeholder="REVOTECH" />
               </div>
             </div>
 
             <div class="grid-4">
               <div class="field">
                 <label>Nội dung</label>
-                <textarea
-                  class="input"
-                  v-model="poster.content"
-                  placeholder="NỘI DUNG Ở ĐÂY"
-                  rows="4"
-                ></textarea>
+                <textarea class="input" v-model="poster.content" placeholder="NỘI DUNG Ở ĐÂY" rows="4"></textarea>
               </div>
             </div>
           </div>
@@ -120,12 +102,7 @@
         <!-- Panel phải: Stage poster -->
         <div class="poster-shell">
           <div class="poster-surface" id="exportTarget">
-            <component
-              :is="currentPoster"
-              :form="poster"
-              :preview-photo="previewPhoto"
-              :key="activeTemplate"
-            />
+            <component :is="currentPoster" :form="poster" :preview-photo="previewPhoto" :key="activeTemplate" />
           </div>
         </div>
       </div>
@@ -141,12 +118,7 @@
       <div class="modal-body">
         <!-- Thanh tìm kiếm -->
         <div class="horizontal">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Tìm kiếm theo tên..."
-            class="search-bar"
-          />
+          <input type="text" v-model="searchQuery" placeholder="Tìm kiếm theo tên..." class="search-bar" />
           <div class="sort-buttons">
             <button @click="sortByDateAscending">Ngày vào nhỏ -> lớn</button>
             <button @click="sortByDateDescending">Ngày vào lớn -> nhỏ</button>
@@ -195,8 +167,6 @@ import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
 import { IMAGE_URL } from "../api/configService";
 
-const isDraft = ref(false);
-
 const props = withDefaults(
   defineProps<{
     mode?: "create" | "edit";
@@ -206,16 +176,17 @@ const props = withDefaults(
     mode: "create",
   }
 );
+const isDraft = ref(props.posterData?.isDraft ?? false);
 const poster = reactive(
   props.posterData
     ? { ...props.posterData }
     : {
-        posterType: "new_employee",
-        title: "CHÀO MỪNG BẠN ĐẾN VỚI",
-        content: "NỘI DUNG Ở ĐÂY",
-        companyName: "TÊN CÔNG TY",
-        user: {} as User,
-      }
+      posterType: "new_employee",
+      title: "CHÀO MỪNG BẠN ĐẾN VỚI",
+      content: "NỘI DUNG Ở ĐÂY",
+      companyName: "TÊN CÔNG TY",
+      user: {} as User,
+    }
 );
 const previewPhoto = ref<string>(
   props.posterData?.user?.avatar
@@ -284,10 +255,12 @@ async function save() {
 // Hàm update photo
 async function update() {
   let fileToUpdate: File | undefined;
+  // phải gán lại không thì sẽ bị mất
+  poster.isDraft = isDraft.value;
   if (photoSource.value === "uploaded" && uploadedFile.value) {
     fileToUpdate = uploadedFile.value;
   }
-
+  console.log(poster.isDraft + "before send")
   // Gọi API update thật
   const res = await updatePoster(poster, fileToUpdate);
   if (res) {
@@ -661,17 +634,20 @@ async function exportPng() {
   color: #1d4ed8;
   /* Màu của icon */
 }
+
 .switch {
   position: relative;
   display: inline-block;
   width: 46px;
   height: 24px;
 }
+
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
+
 .slider {
   position: absolute;
   cursor: pointer;
@@ -680,6 +656,7 @@ async function exportPng() {
   transition: 0.3s;
   border-radius: 34px;
 }
+
 .slider::before {
   position: absolute;
   content: "";
@@ -691,10 +668,12 @@ async function exportPng() {
   transition: 0.3s;
   border-radius: 50%;
 }
-input:checked + .slider {
+
+input:checked+.slider {
   background-color: #1d4ed8;
 }
-input:checked + .slider::before {
+
+input:checked+.slider::before {
   transform: translateX(22px);
 }
 </style>

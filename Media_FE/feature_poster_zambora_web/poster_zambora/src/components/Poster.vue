@@ -6,7 +6,7 @@
     <td class="content">{{ poster.content }}</td>
     <td class="content">{{ poster.createDate }}</td>
     <td class="content">{{ poster.createdBy }}</td>
-    <td class="content">"No"</td>
+    <td class="content">{{ poster.isDraft }}</td>
     <td class="content">{{ poster.posterType }}</td>
     <td class="content">
       <div class="dropdown">

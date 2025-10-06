@@ -47,8 +47,7 @@ export async function updatePoster(
     if (poster.posterType) formData.append("posterType", String(poster.posterType));
     if (poster.companyName) formData.append("companyName", poster.companyName);
     if (poster.user) formData.append("userId", String(poster.user.userId));
-    console.log(poster.user?.fullName + "====user=====")
-    console.log(poster.user?.userId + "====user=====")
+    formData.append("isDraft", String(poster.isDraft))
     formData.append("ownerId", "1")
 
     // Append file nếu có

@@ -52,6 +52,7 @@ export type PosterDTO = {
   updateDate: string
   createdBy: string
   updatedBy: string
+  isDraft: boolean
   user: UserPoster
 }
 

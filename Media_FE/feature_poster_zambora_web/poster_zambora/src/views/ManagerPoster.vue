@@ -364,13 +364,13 @@ function onDelete(p: Poster) {
 }
 
 .table th:nth-child(3),
-.table td:nth-child(4) {
+.table td:nth-child(3) {
   width: 200px;
 }
 
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 400px;
+  width: 300px;
 }
 
 .table th:nth-child(5),
