@@ -13,5 +13,7 @@ data class UserDTO(
     val dob: LocalDate?,
     val homeTown: String,
     val avatar: String,
+    val createDate: LocalDate,
+    val updateDate: LocalDate,
     val roleName: String
 )

@@ -45,6 +45,12 @@ data class User(
     @Enumerated(EnumType.STRING)
     var statusUser: StatusUser,
 
+    @Column(name = "create_date")
+    var createDate: LocalDate,
+
+    @Column(name = "update_date")
+    var updateDate: LocalDate,
+
     @Column(name = "home_town")
     var homeTown: String,
 

@@ -24,12 +24,7 @@ type Poster {
 }
 
 type UserPoster{
-    userId: ID,
-    username: String,
     fullName: String,
-    gender: GenderEnum,
-    email: String,
-    phone: String,
     dob: Date,
     homeTown: String,
     avatar: String,

@@ -34,6 +34,8 @@ type UserDTO{
     phone: String,
     dob: Date,
     homeTown: String,
+    createDate: Date,
+    updateDate: Date,
     avatar: String,
     roleName: String
 }

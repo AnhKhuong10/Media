@@ -17,12 +17,7 @@ data class PosterDTO(
     val user: UserPoster
 ){
     data class UserPoster(
-        val userId: Long,
-        val username: String,
         val fullName: String,
-        val gender: GenderEnum,
-        val email: String,
-        val phone: String,
         val dob: LocalDate?,
         val homeTown: String,
         val avatar: String,
