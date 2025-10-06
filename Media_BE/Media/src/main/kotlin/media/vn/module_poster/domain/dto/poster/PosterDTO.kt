@@ -14,6 +14,7 @@ data class PosterDTO(
     val updateDate: LocalDate?,
     val createdBy: String,
     val updatedBy: String,
+    val isDraft: Boolean,
     val user: UserPoster
 ){
     data class UserPoster(

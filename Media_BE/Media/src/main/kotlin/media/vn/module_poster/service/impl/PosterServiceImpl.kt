@@ -137,6 +137,7 @@ class PosterServiceImpl (
         updateDate = this.updateDate,
         createdBy = this.createdBy?:"",
         updatedBy = this.updatedBy?:"",
+        isDraft = this.isDraft,
         user = this.user.toUserPoster()
     )
 

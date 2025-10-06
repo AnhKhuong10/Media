@@ -42,6 +42,7 @@ type PosterDTO{
     updateDate: String
     createdBy: String
     updatedBy: String
+    isDraft: Boolean
     user: UserPoster
 }
 
