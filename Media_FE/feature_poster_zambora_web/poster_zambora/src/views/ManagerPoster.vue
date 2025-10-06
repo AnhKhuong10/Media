@@ -14,9 +14,18 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…" />
-      <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
-      <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label>
+      <input
+        v-model="q"
+        type="search"
+        class="input"
+        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
+      />
+      <label class="check"
+        ><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label
+      >
+      <label class="check"
+        ><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label
+      >
       <select v-model="styleFilter" class="select">
         <option value="">Tất cả style</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
@@ -41,8 +50,15 @@
         </thead>
 
         <tbody>
-          <poster v-for="(p, index) in posters" :key="p.posterId" :poster="p" :index="index + 1" @view="onView"
-            @edit="onEdit" @delete="onDelete" />
+          <poster
+            v-for="(p, index) in posters"
+            :key="p.posterId"
+            :poster="p"
+            :index="index + 1"
+            @view="onView"
+            @edit="onEdit"
+            @delete="onDelete"
+          />
           <tr v-if="posters.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -61,7 +77,11 @@
       <button class="btn sm" :disabled="pageNumber === totalPages" @click="pageNumber++">
         ›
       </button>
-      <button class="btn sm" :disabled="pageNumber === totalPages" @click="pageNumber = totalPages">
+      <button
+        class="btn sm"
+        :disabled="pageNumber === totalPages"
+        @click="pageNumber = totalPages"
+      >
         »
       </button>
     </footer>
@@ -76,10 +96,12 @@
           <!-- Khung preview (tỉ lệ poster) -->
           <div class="poster-preview-shell">
             <div class="poster-preview-surface">
-              <component v-if="previewForm" 
-              :is="previewComponent" 
-              :form="previewForm" 
-              :preview-photo="previewPhoto" />
+              <component
+                v-if="previewForm"
+                :is="previewComponent"
+                :form="previewForm"
+                :preview-photo="previewPhoto"
+              />
             </div>
           </div>
         </div>
@@ -93,7 +115,7 @@
           <button class="btn" @click="showStudio = false">Đóng</button>
         </div>
         <div class="modal-body">
-          <PostersPage :posterData="editingPoster" />
+          <PostersPage :posterData="editingPoster" mode="edit" />
         </div>
       </div>
     </div>
@@ -106,8 +128,9 @@ import poster from "../components/Poster.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import PostersPage from "../components/PostersPage.vue";
-import type { Poster, PosterDTO, PosterPage } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
+import type { Poster, PosterDTO, PosterPage, PosterUpdateDTO } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
+import { IMAGE_URL } from "../api/configService";
 
 // lấy danh sách poster
 import { getAllPoster } from "../api/graphql/poster-service-graphql";
@@ -137,7 +160,7 @@ function closePreview() {
 
 const previewPhoto = ref<string>(defaultLogo);
 const showStudio = ref(false); // bật/tắt modal PosterStudio
-const editingPoster = ref<Poster | null>(null); // dữ liệu poster đang edit
+const editingPoster = ref<PosterDTO | null>(null); // dữ liệu poster đang edit
 
 const showPreview = ref(false);
 const selectedPoster = ref<PosterDTO | null>(null);
@@ -157,7 +180,10 @@ const previewForm = computed(() => {
   const p = selectedPoster.value;
   if (!p) return null;
   return {
-    posterType: resolvePreviewComponent(p) === PosterNewHire ? PosterType.new_employee : PosterType.honor,
+    posterType:
+      resolvePreviewComponent(p) === PosterNewHire
+        ? PosterType.new_employee
+        : PosterType.honor,
     title: p.title,
     companyName: p.companyName,
     logo: defaultLogo,
@@ -173,31 +199,6 @@ const styleFilter = ref<string>("");
 
 const styleOptions = Array.from(new Set(posters.value.map((p) => p.posterType)));
 
-// const filtered = computed(() => {
-//   const kw = q.value.trim().toLowerCase();
-//   return posters.filter((p) => {
-//     if (draftOnly.value && !p.isDraft) return false;
-//     if (deletedOnly.value && !p.isDeleted) return false;
-//     if (styleFilter.value && p.postStyleId !== styleFilter.value) return false;
-//     if (!kw) return true;
-//     return [p.posterId, p.title, p.content, p.createdBy, p.updatedBy, p.user]
-//       .join(" ")
-//       .toLowerCase()
-//       .includes(kw);
-//   });
-// });
-
-// pagination
-// const page = ref(1);
-// const pageSize = ref(13);
-// const total = computed(() => filtered.value.length);
-// const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)));
-// const paginated = computed(() => {
-//   if (page.value > totalPages.value) page.value = totalPages.value;
-//   const start = (page.value - 1) * pageSize.value;
-//   return filtered.value.slice(start, start + pageSize.value);
-// });
-
 // actions (stub)
 function onCreate() {
   alert("Mở form tạo mới");
@@ -206,13 +207,13 @@ function onCreate() {
 // Hàm onView sẽ gán formNewHire vào selectedPoster
 function onView(p: PosterDTO) {
   console.log("Poster detail:", p); // ✅ log ra để xem toàn bộ object
-  previewPhoto.value =`http://localhost:8080${p.user.avatar}`
+  previewPhoto.value = `${IMAGE_URL}${p.user.avatar}`;
   selectedPoster.value = p; // gán poster đang chọn
   showPreview.value = true; // mở modal
 }
-function onEdit(p: Poster) {
-  editingPoster.value = { ...p }; // clone để tránh sửa trực tiếp
-  showStudio.value = true; // mở modal edit
+function onEdit(p: PosterDTO) {
+  editingPoster.value = { ...p };
+  showStudio.value = true;
 }
 
 function onDelete(p: Poster) {

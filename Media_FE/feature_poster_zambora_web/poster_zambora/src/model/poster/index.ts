@@ -1,4 +1,4 @@
-import { GenderEnum } from "../user";
+
 
 export type Poster = {
   posterId: number;
@@ -24,13 +24,19 @@ export type PosterCreateDTO = {
   userId: string;
 };
 
+export type PosterUpdateDTO = {
+  posterId: number;
+  userId: number;
+  title: string;
+  content: string;
+  posterType: string;
+  companyName: string;
+}
+
 export type UserPoster = {
-  userId: number,
-  username: string,
+  userId: number
   fullName: string,
-  gender: GenderEnum,
   email: string,
-  phone: string,
   dob: Date,
   avatar: string,
   roleName: string

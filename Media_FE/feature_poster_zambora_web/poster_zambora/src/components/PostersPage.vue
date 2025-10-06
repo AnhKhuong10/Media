@@ -3,8 +3,13 @@
     <div class="card-hd">Poster Studio</div>
     <div class="card-bd">
       <div class="toolbar" style="margin-bottom: 12px">
-        <button class="btn secondary" @click="save">Save</button>
-        <button class="btn" @click="exportPng">Export PNG</button>
+        <template v-if="mode === 'create'">
+          <SaveButton label="Save" icon="pi pi-save" @click="save(false)" />
+          <ExportButton @click="exportPng" />
+        </template>
+        <template v-else>
+          <UpdateButton @click="update" />
+        </template>
       </div>
 
       <div class="stage">
@@ -64,6 +69,18 @@
                 <label>Chọn ảnh từ máy</label>
                 <input type="radio" v-model="photoSource" value="uploaded" />
                 <!-- Chọn ảnh từ máy -->
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <div class="horizontal">
+                  <label>Bản nháp</label>
+                  <label class="switch">
+                    <input type="checkbox" v-model="isDraft" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -176,10 +193,19 @@ import PosterRecognition from "../components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { User } from "../model/user";
+import { IMAGE_URL } from "../api/configService";
 
-const props = defineProps<{
-  posterData?: any; // dữ liệu truyền vào khi edit
-}>();
+const isDraft = ref(false);
+
+const props = withDefaults(
+  defineProps<{
+    mode?: "create" | "edit";
+    posterData?: any;
+  }>(),
+  {
+    mode: "create",
+  }
+);
 const poster = reactive(
   props.posterData
     ? { ...props.posterData }
@@ -190,6 +216,11 @@ const poster = reactive(
         companyName: "TÊN CÔNG TY",
         user: {} as User,
       }
+);
+const previewPhoto = ref<string>(
+  props.posterData?.user?.avatar
+    ? `${IMAGE_URL}${props.posterData.user.avatar}`
+    : defaultLogo
 );
 const posterCreateDTO = computed(() => ({
   title: poster.title,
@@ -225,7 +256,7 @@ const filteredUsers = computed(() => {
 // end Lấy danh sách user cho người dùng chọn trong modal
 
 // Hàm lưu poster (gọi API)
-import { createPoster } from "../api/rest/poster-service";
+import { createPoster, updatePoster } from "../api/rest/poster-service";
 const uploadedFile = ref<File | null>(null);
 const photoSource = ref<"default" | "uploaded">("default");
 const uploadedPhoto = ref<string | null>(null);
@@ -243,14 +274,27 @@ async function save() {
     fileToUpload = uploadedFile.value;
   }
 
-  console.log("Payload gửi BE:", posterCreateDTO.value, "File:", fileToUpload);
-
-  const res = await createPoster(posterCreateDTO.value, fileToUpload);
+  const res = await createPoster(posterCreateDTO.value, fileToUpload, isDraft.value);
   if (res) {
-    alert("Lưu thành công Poster!");
+    alert(isDraft ? "Đã lưu bản nháp Poster!" : "Đã lưu thành công Poster!");
   }
 }
 // end Hàm lưu poster (gọi API)
+
+// Hàm update photo
+async function update() {
+  let fileToUpdate: File | undefined;
+  if (photoSource.value === "uploaded" && uploadedFile.value) {
+    fileToUpdate = uploadedFile.value;
+  }
+
+  // Gọi API update thật
+  const res = await updatePoster(poster, fileToUpdate);
+  if (res) {
+    alert("Cập nhật Poster thành công!");
+  }
+}
+// end hàm update photo
 
 // hàm chọn file từ máy
 function handleFileUpload(e: Event) {
@@ -278,10 +322,13 @@ function handleFileUpload(e: Event) {
 }
 // end hàm chọn file từ máy
 
-
-// Thay vì computed từ form.user.photo, dùng ref ổn định:
-const employeePhoto = ref<string>(defaultLogo);
+const employeePhoto = ref<string>(
+  props.posterData?.user?.avatar
+    ? `${IMAGE_URL}${props.posterData.user.avatar}`
+    : defaultLogo
+);
 watch(photoSource, (val) => {
+  // nếu người dùng chọn option upload ảnh từ máy
   if (val === "uploaded" && uploadedPhoto.value) {
     previewPhoto.value = uploadedPhoto.value;
   } else {
@@ -290,14 +337,12 @@ watch(photoSource, (val) => {
 });
 
 const showModal = ref(false);
-const previewPhoto = ref<string>(defaultLogo); // ảnh hiển thị
-
 function selectUser(user: User) {
   poster.user = user;
   poster.userId = user.userId;
 
   // lấy ảnh gốc từ DB (nếu có)
-  employeePhoto.value = user.avatar ? `http://localhost:8080${user.avatar}` : defaultLogo;
+  employeePhoto.value = user.avatar ? `${IMAGE_URL}${user.avatar}` : defaultLogo;
 
   // preview theo radio
   previewPhoto.value =
@@ -307,6 +352,7 @@ function selectUser(user: User) {
 
   showModal.value = false;
 }
+
 const activeTemplate = ref(poster.postStyleId || "1");
 
 watch(activeTemplate, (val) => {
@@ -614,5 +660,41 @@ async function exportPng() {
   /* Tăng kích thước icon */
   color: #1d4ed8;
   /* Màu của icon */
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 34px;
+}
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #1d4ed8;
+}
+input:checked + .slider::before {
+  transform: translateX(22px);
 }
 </style>
