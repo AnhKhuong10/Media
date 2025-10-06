@@ -1,282 +1,309 @@
 <template>
-    <div class="image-card">
-        <div class="iconImage">
-            <i v-if="photo?.liked" @click="() => LikeHandle(photo)" class="pi pi-heart-fill icon"
-                style="font-size: 17px; color:#f871d9; background-color: white;"></i>
+  <div class="photo-item">
+    <!-- Ảnh -->
+    <img :src="photo.url" :alt="photo.name" class="photo-img" />
 
-            <i v-else @click="() => LikeHandle(photo)" class="pi pi-heart icon" style="font-size: 17px;"></i>
+    <!-- Góc dưới phải -->
+    <div class="action-group">
+      <!-- Nút yêu thích -->
+      <button
+        class="icon-btn heart-btn"
+        @click.stop="toggleFavorite(photo)"
+        :title="photo.liked ? 'Bỏ yêu thích' : 'Yêu thích'"
+      >
+        <span v-if="photo.liked">💖</span>
+        <span v-else>🤍</span>
+      </button>
 
-            <i @click="menuVisible = true" class="pi pi-ellipsis-v icon" style="font-size: 17px"></i>
+      <!-- Nút 3 chấm -->
+      <div class="menu-container">
+        <button class="icon-btn menu-btn" @click.stop="toggleMenu" title="Tùy chọn">
+          ⋮
+        </button>
+
+        <transition name="fade">
+          <div v-if="menuVisible" class="menu">
+            <div class="menu-item" @click="() => { emitShare(photo); closeMenu() }">
+              <span class="mi">📤</span>
+              <span class="ml">Chia sẻ</span>
+            </div>
+
+            <!-- Album -->
+            <div class="menu-item" @click="() => { openAlbumModal(photo); closeMenu() }">
+              <span class="mi">📁</span>
+              <span class="ml">Album</span>
+            </div>
+
+            <div class="menu-item delete" @click="() => { emitDelete(photo); closeMenu() }">
+              <span class="mi">🗑️</span>
+              <span class="ml">Xóa</span>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </div>
+
+    <!-- 💿 Popup chọn / tạo album -->
+    <div v-if="showAlbumModal" class="modal-overlay" @click.self="closeAlbumModal">
+      <div class="modal">
+        <h3>Thêm vào Album</h3>
+
+        <div class="album-list">
+          <div
+            v-for="album in albums"
+            :key="album.id"
+            class="album-item"
+            @click="addPhotoToAlbum(album)"
+          >
+            📁 {{ album.name }}
+          </div>
         </div>
 
-        <img @click="visiblPhoto = true" :src="photo?.url" class="image" />
+        <div class="new-album">
+          <input v-model="newAlbumName" placeholder="Tên album mới..." />
+          <button @click="createNewAlbum">Tạo Album</button>
+        </div>
 
-        <!-- photo full screen -->
-        <Dialog v-model:visible="visiblPhoto" maximizable modal :header="photo.filename" :style="{ width: '50rem' }"
-            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
-            <template #header>
-                <p>{{ photo?.filename }}</p>
-                <i @click="visible = true" class="pi pi-images" style="font-size: 2rem"></i>
-                <!-- Or use a custom SVG -->
-                <!-- <svg ...>...</svg> -->
-            </template>
-            <img :src="photo?.url" class="image" />
-
-        </Dialog>
-        <!-- Dialog menu 3 chấm -->
-        <Dialog v-model:visible="menuVisible" modal :style="{ width: '18rem' }" class="custom-dialog">
-            <template #header>
-                <div class="dialog-header">
-                    <img :src="photo?.url" class="thumb" />
-                    <div class="info">
-                        <h3>{{ photo?.filename }}</h3>
-                        <p>{{ new Date(photo?.createdAt).toLocaleDateString() }}</p>
-                    </div>
-                </div>
-            </template>
-            <div class="dialog-body">
-                <ul style="list-style:none; padding:0; margin:0;">
-                    <li style="padding:10px 0; cursor:pointer;" @click="shareDialogVisible = true; menuVisible = false">
-                        <i class="pi pi-share-alt" style="margin-right:8px"></i> Chia sẻ
-                    </li>
-                    <li style="padding:10px 0; cursor:pointer;"
-                        @click="addAlbumDialogVisible = true; menuVisible = false">
-                        <i class="pi pi-folder-plus" style="margin-right:8px"></i> Thêm vào album
-                    </li>
-                    <li style="padding:10px 0; cursor:pointer; color:#dc2626;"
-                        @click="deleteDialogVisible = true; menuVisible = false">
-                        <i class="pi pi-trash" style="margin-right:8px"></i> Xóa
-                    </li>
-                </ul>
-            </div>
-        </Dialog>
-        <!-- Dialog chia sẻ -->
-        <Dialog v-model:visible="shareDialogVisible" modal :style="{ width: '22rem' }" class="custom-dialog">
-            <template #header>
-                <div class="dialog-header">
-                    <img :src="photo?.url" class="thumb" />
-                    <div class="info">
-                        <h3>{{ photo?.filename }}</h3>
-                    </div>
-                </div>
-            </template>
-            <div class="dialog-body">
-                <div class="share-options">
-                    <Button icon="pi pi-link" @click="() => handleCoppy(photo?.url)" label="Tạo liên kết" text></Button>
-                    <Button icon="pi pi-facebook" label="Facebook" text></Button>
-                    <Button icon="pi pi-envelope" label="Email" text></Button>
-                </div>
-            </div>
-            <template #footer>
-                <Button label="Đóng" severity="secondary" @click="shareDialogVisible = false" />
-            </template>
-        </Dialog>
-        <!-- Dialog xác nhận xóa -->
-        <Dialog v-model:visible="deleteDialogVisible" modal :style="{ width: '18rem' }" class="custom-dialog">
-            <template #header>
-                <div class="dialog-header">
-                    <img :src="photo?.url" class="thumb" />
-                    <div class="info">
-                        <h3>{{ photo?.filename }}</h3>
-                    </div>
-                </div>
-            </template>
-            <div class="dialog-body">
-                <div>Bạn có chắc muốn xóa ảnh này không?</div>
-            </div>
-            <template #footer>
-                <Button label="Hủy" severity="secondary" @click="deleteDialogVisible = false" />
-                <Button label="Xóa" severity="danger" @click="deletePhoto" />
-            </template>
-        </Dialog>
-        <!-- Dialog thêm vào album -->
-        <Dialog v-model:visible="addAlbumDialogVisible" modal :style="{ width: '22rem' }" class="custom-dialog">
-            <template #header>
-                <div class="dialog-header">
-                    <img :src="photo?.url" class="thumb" />
-                    <div class="info">
-                        <h3>{{ photo?.filename }}</h3>
-                    </div>
-                </div>
-            </template>
-            <div class="dialog-body">
-                <h4>Chọn album để thêm ảnh</h4>
-                <ul class="folder-list">
-                    <li v-for="(item, i) in albums" :key="i"
-                        @click="addToAlbum(photo, item); addAlbumDialogVisible = false" class="folder-item">
-                        <i class="pi pi-folder"></i> {{ item.name }}
-                    </li>
-                </ul>
-            </div>
-            <template #footer>
-                <Button label="Đóng" severity="secondary" @click="addAlbumDialogVisible = false" />
-            </template>
-        </Dialog>
+        <button class="close-btn" @click="closeAlbumModal">Đóng</button>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from "vue"
-import Dialog from "primevue/dialog"
-import Button from "primevue/button"
-import copyToClipboard from "../../graphql/CookieFuntion.js"
-import { DataAlbumUser } from "../../graphql/FakeData.js"
-// import { DataAlbumUser } from "../graphql/FakeData.js"
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-defineProps({
-    photo: {
-        type: Object,
-        required: true,
-        default: () => ({
-            id: null,
-            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEaYTaC-q-QWUu2g7QgVvRKkJkqXjXtjBU2w&s",
-            filename: "img1",
-            liked: true,
-            createdAt: "2025-09-28T11:42:40.806042Z",
-            isDeleted: false
-        })
-    }
+const emit = defineEmits(['delete-photo', 'toggle-like', 'share-photo'])
+
+const props = defineProps({
+  photo: {
+    type: Object,
+    required: true,
+  },
 })
 
 const menuVisible = ref(false)
-const shareDialogVisible = ref(false)
-const deleteDialogVisible = ref(false)
-const addAlbumDialogVisible = ref(false)
-const visiblPhoto = ref(false)
-const albums = ref([])
-albums.value = DataAlbumUser.data.getUserAlbums
-// console.log(albums.value)
-const folders = ref([
-    { id: 1, name: "Gia đình" },
-    { id: 2, name: "Du lịch" },
-    { id: 3, name: "Công việc" },
-    { id: 4, name: "Khác" }
+const showAlbumModal = ref(false)
+const selectedPhoto = ref(null)
+const newAlbumName = ref('')
+const albums = ref([
+  { id: 1, name: 'Kỷ niệm' },
+  { id: 2, name: 'Gia đình' },
+  { id: 3, name: 'Chuyến đi' },
 ])
 
-function addToAlbum(photoParam, albumParam) {
-    alert(`Đã thêm ảnh "${photoParam.filename}" vào album "${albumParam.name}"`)
-    // visible.value = false
+function toggleMenu() {
+  menuVisible.value = !menuVisible.value
+}
+function closeMenu() {
+  menuVisible.value = false
 }
 
-const handleCoppy = (text) => {
-    copyToClipboard(text)
+// Đóng menu khi click ra ngoài
+function handleClickOutside(e) {
+  if (!e.target.closest('.menu-container')) {
+    menuVisible.value = false
+  }
+}
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
+
+// Emit các hành động
+function emitDelete(photo) {
+  emit('delete-photo', photo)
+}
+function emitShare(photo) {
+  emit('share-photo', photo)
+}
+function toggleFavorite(photo) {
+  emit('toggle-like', photo)
 }
 
-const LikeHandle = (item) => {
-    alert("sử lý sự liện ảnh yêu thích ở đây")
+// Album modal
+function openAlbumModal(photo) {
+  selectedPhoto.value = photo
+  showAlbumModal.value = true
 }
-
-function deletePhoto() {
-    alert(`Đã xóa ảnh "${photo.filename}" (mock)`);
-    deleteDialogVisible.value = false;
+function closeAlbumModal() {
+  showAlbumModal.value = false
+  newAlbumName.value = ''
+}
+function addPhotoToAlbum(album) {
+  alert(`Đã thêm ảnh "${selectedPhoto.value.name}" vào album "${album.name}"`)
+  closeAlbumModal()
+}
+function createNewAlbum() {
+  if (!newAlbumName.value.trim()) return alert('Vui lòng nhập tên album!')
+  const newAlbum = { id: Date.now(), name: newAlbumName.value.trim() }
+  albums.value.push(newAlbum)
+  alert(`Đã tạo album "${newAlbum.name}" và thêm ảnh vào đó`)
+  closeAlbumModal()
 }
 </script>
 
 <style scoped>
-.image-card {
-    border: 1px solid #eee;
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    width: 100%;
-    position: relative;
-    height: 96%;
+.photo-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
 }
 
-.iconImage {
-    position: absolute;
-    top: 0;
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding: 5px;
-    gap: 10px;
-    color: white;
-    height: 100%;
-    justify-content: space-between;
+.photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.icon {
-    background: #ffffff85;
-    border-radius: 50%;
-    padding: 6px;
-    cursor: pointer;
-    transition: background 1s;
-    display: none;
+/* góc dưới phải */
+.action-group {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 20;
 }
 
-.image-card:hover .icon {
-    display: block;
+/* nút icon chung */
+.icon-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 8px;
+  padding: 6px;
+  min-width: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  transition: background 0.15s;
+}
+.icon-btn:hover { background: white; }
+
+.heart-btn {
+  color: #ff4b91;
 }
 
-.icon:hover {
-    background: rgba(0, 0, 0, 0.6);
+/* menu container */
+.menu-container { position: relative; }
+
+.menu-btn {
+  border-radius: 8px;
+  font-size: 18px;
+  line-height: 1;
 }
 
-.image {
-    width: 100%;
-    aspect-ratio: 7 / 5;
-    object-fit: cover;
-    transition: opacity 0.6s;
+/* menu dropdown */
+.menu {
+  position: absolute;
+  right: 0;
+  bottom: 42px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding: 6px;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 30;
 }
 
-/* Dialog style */
-.custom-dialog .dialog-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.menu-item:hover { background: #f7f7f8; }
+.menu-item.delete { color: #dc2626; }
+.mi { width: 22px; text-align: center; }
+
+/* modal album */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
 }
 
-.custom-dialog .thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    object-fit: cover;
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 360px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.custom-dialog .info h3 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
+.album-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
 }
 
-.custom-dialog .info p {
-    margin: 0;
-    font-size: 0.8rem;
-    color: #666;
+.album-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f3f3;
+}
+.album-item:hover {
+  background: #f6f8ff;
 }
 
-.dialog-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-top: 10px;
+.new-album {
+  display: flex;
+  gap: 8px;
 }
 
-/* Folder list */
-.folder-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 200px;
-    overflow: scroll;
+.new-album input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-.folder-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
+.new-album button {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.new-album button:hover {
+  background: #0056b3;
 }
 
-.folder-item:hover {
-    background: #f0f0f0;
+.close-btn {
+  align-self: flex-end;
+  background: #ddd;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
 }
+.close-btn:hover {
+  background: #ccc;
+}
+
+/* fade animation */
+.fade-enter-active, .fade-leave-active { transition: opacity .12s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
