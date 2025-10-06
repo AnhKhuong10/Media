@@ -59,6 +59,8 @@ class UserServiceImpl (
         dob = this.dob,
         homeTown = this.homeTown,
         avatar = this.avatar,
+        createDate = this.createDate,
+        updateDate = this.updateDate,
         roleName = this.role.roleName
     )
 }

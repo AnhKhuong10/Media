@@ -142,12 +142,7 @@ class PosterServiceImpl (
 
     private fun User.toUserPoster(): PosterDTO.UserPoster {
         return PosterDTO.UserPoster(
-            userId = this.userId,
-            username = this.username,
             fullName = this.fullName,
-            gender = this.gender,
-            email = this.email,
-            phone = this.phone,
             dob = this.dob,
             homeTown = this.homeTown,
             avatar = this.avatar,
