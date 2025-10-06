@@ -3,22 +3,27 @@
     <h2 class="page-title">Favorites</h2>
 
     <div class="photo-grid">
-
-      <PhotoListFormLineXn :photos="favorites" :type_component="{ type: 'favorites' }" />
+      <PhotoListFormLineXn
+        :photos="favorites"
+        :type_component="{ type: 'favorites' }"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { photoData } from '../graphql/FakeData.js'
+import { ref, onMounted } from 'vue'
 import PhotoListFormLineXn from '../components/photo/PhotoListFormLineXn.vue'
 
-const imgNull = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9HCTh-hWpcMY7Ka0ieXhioeEf5SSpIPQ6NA&s'
-const favorites = ref()
+// Dữ liệu chung của toàn app
+const allPhotos = JSON.parse(localStorage.getItem('my_photos_gallery') || '[]')
 
-favorites.value = photoData.data.getUserPhotos
-console.log('test favorites : ', favorites.value)
+// ⚡️ favorites chỉ là “bản copy tĩnh” khi trang này load
+const favorites = ref([])
+
+onMounted(() => {
+  favorites.value = allPhotos.filter(p => p.liked).map(p => ({ ...p })) // tạo bản sao, không reactive
+})
 </script>
 
 <style scoped>
@@ -27,14 +32,7 @@ console.log('test favorites : ', favorites.value)
   margin-bottom: 1rem;
   font-weight: 600;
 }
-
 .photo-grid {
   width: 100%;
-}
-
-.photo-card img {
-  width: 100%;
-  aspect-ratio: 2/2;
-  border-radius: 8px;
 }
 </style>

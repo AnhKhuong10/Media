@@ -7,16 +7,12 @@
     @dragover.prevent
     @drop.prevent="handleDrop"
   >
-    <div v-if="localPhotos.length === 0" class="no-data">
+    <div v-if="displayedPhotos.length === 0" class="no-data">
       No data
     </div>
 
     <div v-else class="grids">
-      <div
-        v-for="(item, i) in localPhotos"
-        :key="i"
-        class="photo-card"
-      >
+      <div v-for="(item, i) in displayedPhotos" :key="i" class="photo-card">
         <PhotoItem
           :photo="item"
           v-if="type_component.type === 'favorites' ? item.liked : true"
@@ -34,114 +30,96 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import PhotoItem from './PhotoItem.vue'
 
-const STORAGE_KEY = 'my_photos_gallery'
+const STORAGE_PHOTOS = 'my_photos_gallery'
+const STORAGE_FAVORITES = 'my_favorites_gallery'
 
 const props = defineProps({
-  photos: {
-    type: Array,
-    default: () => [],
-  },
-  type_component: {
-    type: Object,
-    default: () => ({ type: 'photos' }),
-  },
+  photos: Array,
+  type_component: Object,
 })
 
-// ✅ localPhotos lưu cả dữ liệu props và ảnh trong localStorage
 const localPhotos = ref([])
-
-onMounted(() => {
-  // 1️⃣ Lấy ảnh từ localStorage (nếu có)
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved) {
-    try {
-      localPhotos.value = JSON.parse(saved)
-    } catch {
-      localPhotos.value = []
-    }
-  } else {
-    localPhotos.value = [...props.photos]
-  }
-})
-
-// 2️⃣ Đồng bộ lại khi props.photos thay đổi
-watch(
-  () => props.photos,
-  (newVal) => {
-    localPhotos.value = [...newVal]
-    saveToLocalStorage()
-  },
-  { deep: true }
-)
-
-// 3️⃣ Tự động lưu vào localStorage mỗi khi localPhotos thay đổi
-watch(
-  localPhotos,
-  (newVal) => {
-    saveToLocalStorage()
-  },
-  { deep: true }
-)
-
+const localFavorites = ref([])
 const dragFileStatus = ref(false)
 
-const onDragEnter = () => {
-  dragFileStatus.value = true
-}
+// 🧠 Khi mount, đọc cả 2 storage
+onMounted(() => {
+  const photos = localStorage.getItem(STORAGE_PHOTOS)
+  const favorites = localStorage.getItem(STORAGE_FAVORITES)
 
-const onDragLeave = (event) => {
-  if (event.target === event.currentTarget) {
-    dragFileStatus.value = false
+  localPhotos.value = photos ? JSON.parse(photos) : [...props.photos]
+  localFavorites.value = favorites ? JSON.parse(favorites) : []
+})
+
+// 📸 Tùy vào component mà hiển thị danh sách tương ứng
+const displayedPhotos = computed(() => {
+  if (props.type_component.type === 'favorites') {
+    return localFavorites.value
+  } else {
+    return localPhotos.value
   }
+})
+
+// 💾 Lưu vào localStorage
+function savePhotos() {
+  localStorage.setItem(STORAGE_PHOTOS, JSON.stringify(localPhotos.value))
+}
+function saveFavorites() {
+  localStorage.setItem(STORAGE_FAVORITES, JSON.stringify(localFavorites.value))
 }
 
-// ✅ Khi thả ảnh, đọc file và thêm trực tiếp vào gallery
-const handleDrop = (event) => {
+// 🗑️ Xoá ảnh
+function handleDeletePhoto(photo) {
+  localPhotos.value = localPhotos.value.filter(p => p.id !== photo.id)
+  localFavorites.value = localFavorites.value.filter(p => p.id !== photo.id)
+  savePhotos()
+  saveFavorites()
+}
+
+// ❤️ Thích / bỏ thích
+function handleToggleFavorite(photo) {
+  const p = localPhotos.value.find(p => p.id === photo.id)
+  if (p) p.liked = !p.liked
+
+  if (p?.liked) {
+    // thêm mới lên đầu Favorites
+    const exist = localFavorites.value.find(f => f.id === photo.id)
+    if (!exist) localFavorites.value.unshift(p)
+  } else {
+    // bỏ khỏi Favorites
+    localFavorites.value = localFavorites.value.filter(f => f.id !== photo.id)
+  }
+
+  savePhotos()
+  saveFavorites()
+}
+
+// 📤 Kéo thả ảnh
+function handleDrop(e) {
   dragFileStatus.value = false
-
-  const files = Array.from(event.dataTransfer.files).filter((f) =>
-    f.type.startsWith('image/')
-  )
-
-  if (files.length === 0) {
-    alert('Vui lòng chọn đúng định dạng ảnh!')
-    return
-  }
-
-  files.forEach((file) => {
+  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
+  files.forEach(file => {
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = ev => {
       const newPhoto = {
-        id: Date.now() + Math.random().toString(36).slice(2), // 🆔 id duy nhất
-        url: e.target.result,
+        id: Date.now() + Math.random().toString(36).slice(2),
+        url: ev.target.result,
         name: file.name,
         liked: false,
       }
       localPhotos.value.unshift(newPhoto)
+      savePhotos()
     }
     reader.readAsDataURL(file)
   })
 }
 
-// 🧠 Hàm lưu vào localStorage
-function saveToLocalStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(localPhotos.value))
-}
-
-// 🗑️ Nhận sự kiện xoá ảnh từ PhotoItem
-function handleDeletePhoto(photo) {
-  localPhotos.value = localPhotos.value.filter(p => p.id !== photo.id)
-  saveToLocalStorage()
-}
-
-// ❤️ Nhận sự kiện toggle favorite
-function handleToggleFavorite(photo) {
-  const target = localPhotos.value.find(p => p.id === photo.id)
-  if (target) target.liked = !target.liked
-  saveToLocalStorage()
+const onDragEnter = () => (dragFileStatus.value = true)
+const onDragLeave = (e) => {
+  if (e.target === e.currentTarget) dragFileStatus.value = false
 }
 </script>
 
@@ -166,7 +144,7 @@ function handleToggleFavorite(photo) {
 }
 
 .photo-card {
-  width: 200px;        /* 👈 tất cả ảnh có cùng kích thước */
+  width: 200px;
   height: 200px;
   border-radius: 8px;
   overflow: hidden;
