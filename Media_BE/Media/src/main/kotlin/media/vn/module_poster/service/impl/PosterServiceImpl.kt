@@ -149,6 +149,7 @@ class PosterServiceImpl (
             email = this.email,
             phone = this.phone,
             dob = this.dob,
+            homeTown = this.homeTown,
             avatar = this.avatar,
             roleName = this.role.roleName
         )
