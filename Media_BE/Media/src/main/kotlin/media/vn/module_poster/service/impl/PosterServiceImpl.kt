@@ -137,7 +137,7 @@ class PosterServiceImpl (
         updateDate = this.updateDate,
         createdBy = this.createdBy?:"",
         updatedBy = this.updatedBy?:"",
-        userPoster = this.user.toUserPoster()
+        user = this.user.toUserPoster()
     )
 
     private fun User.toUserPoster(): PosterDTO.UserPoster {

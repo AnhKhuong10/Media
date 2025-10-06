@@ -14,7 +14,7 @@ data class PosterDTO(
     val updateDate: LocalDate?,
     val createdBy: String,
     val updatedBy: String,
-    val userPoster: UserPoster
+    val user: UserPoster
 ){
     data class UserPoster(
         val userId: Long,
