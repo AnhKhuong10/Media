@@ -85,6 +85,4 @@ class PosterReactionServiceImpl(
             createdAt = this.createDate
         )
     }
-
-
 }

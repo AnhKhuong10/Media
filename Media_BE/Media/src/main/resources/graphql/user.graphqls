@@ -20,6 +20,7 @@ type User{
     fullName: String,
     gender: GenderEnum
     dob: Date,
+    homeTown: String,
     avatar: String,
     role: Role!
 }
@@ -32,6 +33,7 @@ type UserDTO{
     email: String,
     phone: String,
     dob: Date,
+    homeTown: String,
     avatar: String,
     roleName: String
 }

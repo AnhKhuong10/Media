@@ -7,12 +7,16 @@ import media.vn.module_poster.domain.entity.Poster
 import media.vn.module_poster.domain.entity.User
 import media.vn.module_poster.repository.PosterRepository
 import media.vn.module_poster.repository.UserRepository
+import media.vn.module_poster.service.FileService
 import media.vn.module_poster.service.PosterService
 import media.vn.utils.exception.BusinessException
 import media.vn.utils.exception.ErrorCode
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
+import java.net.URISyntaxException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -24,6 +28,7 @@ import java.util.*
 class PosterServiceImpl (
     private val posterRepository: PosterRepository,
     private val userRepository: UserRepository,
+    private val fileService: FileService,
 ) : PosterService {
 
     val uploadDir = Paths.get("src/main/resources/static/images")
@@ -41,17 +46,23 @@ class PosterServiceImpl (
 //            BusinessException(ErrorCode.UNAUTHORIZED,"User not logged in")
 //        }
 
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir)
-        }
-        // xử lý file upload
+//        if (!Files.exists(uploadDir)) {
+//            Files.createDirectories(uploadDir)
+//        }
+//        // xử lý file upload
+//        var filePath: String? = null
+//        input.file.let { file ->
+//            val fileName = UUID.randomUUID().toString() + "_" + file.originalFilename
+//            val target = uploadDir.resolve(fileName)
+//            Files.copy(file.inputStream, target, StandardCopyOption.REPLACE_EXISTING)
+//            println(" File saved at: $target")
+//            filePath = "/images/$fileName"
+//        }
+
+        // --- Upload file ảnh ---
         var filePath: String? = null
-        input.file.let { file ->
-            val fileName = UUID.randomUUID().toString() + "_" + file.originalFilename
-            val target = uploadDir.resolve(fileName)
-            Files.copy(file.inputStream, target, StandardCopyOption.REPLACE_EXISTING)
-            println(" File saved at: $target")
-            filePath = "/images/$fileName"
+        input.file?.let { file ->
+            filePath = handleFileUpload(file, "poster")
         }
 
         val poster = Poster(
@@ -86,16 +97,10 @@ class PosterServiceImpl (
             BusinessException(ErrorCode.NOT_FOUND,"user not found")
         }
 
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir)
-        }
-        // xử lý file upload
-        var filePath: String? = null
+        // Upload file mới
+        var filePath: String? = poster.filePath
         input.file?.let { file ->
-            val fileName = UUID.randomUUID().toString() + "_" + file.originalFilename
-            val target = uploadDir.resolve(fileName)
-            Files.copy(file.inputStream, target, StandardCopyOption.REPLACE_EXISTING)
-            filePath = "/images/$fileName"
+            filePath = handleFileUpload(file, "poster")
         }
         poster.title = input.title
         poster.content = input.content
@@ -144,9 +149,24 @@ class PosterServiceImpl (
             email = this.email,
             phone = this.phone,
             dob = this.dob,
+            homeTown = this.homeTown,
             avatar = this.avatar,
             roleName = this.role.roleName
         )
+    }
+
+    /**
+     *  Helper — upload file an toàn qua FileService
+     */
+    private fun handleFileUpload(file: MultipartFile, folder: String): String? {
+        return try {
+            val fileName = fileService.store(file, folder)
+            "/$folder/$fileName"
+        } catch (e: IOException) {
+            throw BusinessException(ErrorCode.BAD_REQUEST, "Error saving file: ${e.message}")
+        } catch (e: URISyntaxException) {
+            throw BusinessException(ErrorCode.BAD_REQUEST, "Invalid file path: ${e.message}")
+        }
     }
 
 }

@@ -24,6 +24,7 @@ data class PosterDTO(
         val email: String,
         val phone: String,
         val dob: LocalDate?,
+        val homeTown: String,
         val avatar: String,
         val roleName: String
     )
