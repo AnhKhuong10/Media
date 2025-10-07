@@ -7,27 +7,18 @@
         <span class="muted">{{ totalElements }} bản ghi</span>
       </div>
       <div class="hd-right">
-        <button class="btn primary" @click="onCreate">Tạo mới</button>
-        <button class="btn" @click="null">Export CSV</button>
+        <button class="btn primary" @click="showModalCreate = true">Tạo mới</button>
       </div>
     </header>
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input
-        v-model="q"
-        type="search"
-        class="input"
-        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
-      />
-      <label class="check"
-        ><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label
-      >
-      <label class="check"
-        ><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label
-      >
-      <select v-model="styleFilter" class="select">
-        <option value="">Tất cả style</option>
+      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
+        @input="onSearch" />
+      <!-- <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
+      <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label> -->
+      <select v-model="styleFilter" class="select" style="width: 35%;">
+        <option value="">Tất cả kiểu</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
       </select>
     </div>
@@ -50,15 +41,8 @@
         </thead>
 
         <tbody>
-          <poster
-            v-for="(p, index) in posters"
-            :key="p.posterId"
-            :poster="p"
-            :index="index + 1"
-            @view="onView"
-            @edit="onEdit"
-            @delete="onDelete"
-          />
+          <poster v-for="(p, index) in posters" :key="p.posterId" :poster="p" :index="index + 1" @view="onView"
+            @edit="onEdit" @delete="onDelete" />
           <tr v-if="posters.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -69,39 +53,37 @@
     <!-- Pagination -->
     <footer class="pager">
       <div class="spacer"></div>
-      <button class="btn sm" :disabled="pageNumber === 1" @click="pageNumber = 1">
+
+      <button class="btn sm" :disabled="pageNumber === 0" @click="pageNumber = 0">
         «
       </button>
-      <button class="btn sm" :disabled="pageNumber === 1" @click="pageNumber--">‹</button>
-      <span class="muted">Trang {{ pageNumber }} / {{ totalPages }}</span>
-      <button class="btn sm" :disabled="pageNumber === totalPages" @click="pageNumber++">
+
+      <button class="btn sm" :disabled="pageNumber === 0" @click="pageNumber--">
+        ‹
+      </button>
+
+      <span class="muted">Trang {{ pageNumber + 1 }} / {{ totalPages }}</span>
+
+      <button class="btn sm" :disabled="pageNumber >= totalPages - 1" @click="pageNumber++">
         ›
       </button>
-      <button
-        class="btn sm"
-        :disabled="pageNumber === totalPages"
-        @click="pageNumber = totalPages"
-      >
+
+      <button class="btn sm" :disabled="pageNumber >= totalPages - 1" @click="pageNumber = totalPages - 1">
         »
       </button>
     </footer>
 
     <!-- modal preview -->
-    <div v-if="showPreview" class="modal-backdrop" @click="closePreview">
+    <div v-if="showModalPreview" class="modal-backdrop" @click="showModalPreview = false">
       <div class="modal-preview" @click.stop>
         <div class="modal-hd">
-          <button class="btn" @click="closePreview">Đóng</button>
+          <button class="btn" @click="showModalPreview = false">Đóng</button>
         </div>
         <div class="modal-body">
           <!-- Khung preview (tỉ lệ poster) -->
           <div class="poster-preview-shell">
             <div class="poster-preview-surface">
-              <component
-                v-if="previewForm"
-                :is="previewComponent"
-                :form="previewForm"
-                :preview-photo="previewPhoto"
-              />
+              <component v-if="previewForm" :is="previewComponent" :form="previewForm" :preview-photo="previewPhoto" />
             </div>
           </div>
         </div>
@@ -109,21 +91,34 @@
     </div>
 
     <!-- modal edit -->
-    <div v-if="showStudio" class="modal-backdrop" @click="showStudio = false">
+    <div v-if="showModalEdit" class="modal-backdrop" @click="showModalEdit = false">
       <div class="modal-edit" @click.stop>
         <div class="modal-hd">
-          <button class="btn" @click="showStudio = false">Đóng</button>
+          <button class="btn" @click="showModalEdit = false">Đóng</button>
         </div>
         <div class="modal-body">
-          <PostersPage :posterData="editingPoster" mode="edit" />
+          <PostersPage :posterData="editingPoster" mode="edit" @update-success="onUpdateSuccess" />
         </div>
       </div>
     </div>
+
+    <!-- modal create -->
+    <div v-if="showModalCreate" class="modal-backdrop" @click="showModalCreate = false">
+      <div class="modal-edit" @click.stop>
+        <div class="modal-hd">
+          <button class="btn" @click="showModalCreate = false">Đóng</button>
+        </div>
+        <div class="modal-body">
+          <PostersPage mode="create" />
+        </div>
+      </div>
+    </div>
+
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import poster from "../components/Poster.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
@@ -136,33 +131,54 @@ import { IMAGE_URL } from "../api/configService";
 import { getAllPoster } from "../api/graphql/poster-service-graphql";
 import { PosterType } from "../model/poster";
 const pageNumber = ref(0);
-const pageSize = ref(5);
-const search = ref("");
+const pageSize = ref(10);
 const totalPages = ref(0);
 const totalElements = ref(0);
 const posters = ref<PosterDTO[]>([]);
-onMounted(async () => {
-  const posterPage: PosterPage = await getAllPoster(pageNumber.value, pageSize.value, "");
-  // gán content vào posters
-  posters.value = posterPage.content;
-  totalPages.value = posterPage.totalPages;
-  totalElements.value = posterPage.totalElements;
-  pageNumber.value = posterPage.pageNumber;
-  pageSize.value = posterPage.pageSize;
-  console.log("list poster", posterPage.content);
+
+onMounted(fetchPosters);
+const loading = ref(false);
+const q = ref("");
+async function fetchPosters() {
+  try {
+    loading.value = true;
+    const posterPage: PosterPage = await getAllPoster(
+      pageNumber.value,
+      pageSize.value,
+      q.value.trim()
+    );
+    posters.value = posterPage.content;
+    totalPages.value = posterPage.totalPages;
+    totalElements.value = posterPage.totalElements;
+    pageNumber.value = posterPage.pageNumber;
+    pageSize.value = posterPage.pageSize;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách Poster:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+let searchTimer: number | undefined;
+function onSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = window.setTimeout(() => {
+    pageNumber.value = 0; // reset về trang đầu khi tìm
+    fetchPosters();
+  }, 200);
+}
+// Khi người dùng chuyển trang
+watch(pageNumber, () => {
+  fetchPosters();
 });
 // end
 
-function closePreview() {
-  showPreview.value = false; // Ẩn modal
-  selectedPoster.value = null; // Xoá poster đang chọn
-}
-
 const previewPhoto = ref<string>(defaultLogo);
-const showStudio = ref(false); // bật/tắt modal PosterStudio
+const showModalEdit = ref(false);
+const showModalPreview = ref(false);
+const showModalCreate = ref(false);
+
 const editingPoster = ref<PosterDTO | null>(null); // dữ liệu poster đang edit
 
-const showPreview = ref(false);
 const selectedPoster = ref<PosterDTO | null>(null);
 function resolvePreviewComponent(p?: PosterDTO | null) {
   if (!p) return PosterNewHire;
@@ -192,12 +208,17 @@ const previewForm = computed(() => {
 });
 
 // search & filters
-const q = ref("");
 const draftOnly = ref(false);
 const deletedOnly = ref(false);
 const styleFilter = ref<string>("");
 
-const styleOptions = Array.from(new Set(posters.value.map((p) => p.posterType)));
+// select type
+const styleOptions = computed(() => {
+  // lấy ra 1 mảng các posterType (loại bỏ null/undefined)
+  const types = posters.value.map((p) => p.posterType).filter(Boolean);
+  // trả về 1 set kh bị trùng lặp các type
+  return Array.from(new Set(types));
+});
 
 // actions (stub)
 function onCreate() {
@@ -209,13 +230,17 @@ function onView(p: PosterDTO) {
   console.log("Poster detail:", p); // ✅ log ra để xem toàn bộ object
   previewPhoto.value = `${IMAGE_URL}${p.user.avatar}`;
   selectedPoster.value = p; // gán poster đang chọn
-  showPreview.value = true; // mở modal
+  showModalPreview.value = true; // mở modal
 }
 function onEdit(p: PosterDTO) {
   editingPoster.value = { ...p };
-  showStudio.value = true;
+  showModalEdit.value = true;
 }
-
+function onUpdateSuccess() {
+  console.log("✅ Nhận emit thành công từ con!");
+  showModalEdit.value = false;
+  fetchPosters();
+}
 function onDelete(p: Poster) {
   alert(`Xóa ${p.posterId}`);
 }
@@ -286,7 +311,7 @@ function onDelete(p: Poster) {
   gap: 8px;
   flex-wrap: wrap;
   padding: 12px 0;
-  padding-right: 630px;
+  padding-right: 830px;
 }
 
 .input {
@@ -370,7 +395,7 @@ function onDelete(p: Poster) {
 
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 300px;
+  width: 200px;
 }
 
 .table th:nth-child(5),

@@ -21,8 +21,8 @@
               <div class="horizontal">
                 <label>Loại Poster</label>
                 <select class="select" v-model="activeTemplate" style="width: 50%">
-                  <option value="1">Nhân viên mới</option>
-                  <option value="2">Vinh danh</option>
+                  <option value="new_employee">Nhân viên mới</option>
+                  <option value="honor">Vinh danh</option>
                 </select>
               </div>
             </div>
@@ -253,6 +253,7 @@ async function save() {
 // end Hàm lưu poster (gọi API)
 
 // Hàm update photo
+const emit = defineEmits(["update-success"]);
 async function update() {
   let fileToUpdate: File | undefined;
   // phải gán lại không thì sẽ bị mất
@@ -265,6 +266,8 @@ async function update() {
   const res = await updatePoster(poster, fileToUpdate);
   if (res) {
     alert("Cập nhật Poster thành công!");
+    emit("update-success");
+    console.log("🚀 Emit ra ngoài thành công");
   }
 }
 // end hàm update photo
@@ -326,14 +329,14 @@ function selectUser(user: User) {
   showModal.value = false;
 }
 
-const activeTemplate = ref(poster.postStyleId || "1");
+const activeTemplate = ref(poster.posterType|| "new_employee");
 
 watch(activeTemplate, (val) => {
-  poster.postStyleId = val; // đồng bộ khi đổi select box
+  poster.posterType = val; // đồng bộ khi đổi select box
 });
 
 const currentPoster = computed(() =>
-  activeTemplate.value === "1" ? PosterNewHire : PosterRecognition
+  activeTemplate.value === "new_employee" ? PosterNewHire : PosterRecognition
 );
 function triggerFileUpload() {
   document.getElementById("fileInput")?.click(); // Gọi click cho input file ẩn

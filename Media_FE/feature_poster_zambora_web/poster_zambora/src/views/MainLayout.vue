@@ -9,7 +9,6 @@
         </div>
       </div>
       <nav class="nav">
-        <RouterLink to="/comms/posters/create" class="link" active-class="active">Poster Studio</RouterLink>
         <RouterLink to="/comms/posters/manager" class="link">Manager poster</RouterLink>
       </nav>
       <div class="sb-foot">v1.0 • Vue 3</div>

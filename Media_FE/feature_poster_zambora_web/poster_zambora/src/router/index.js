@@ -10,12 +10,7 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/comms/posters/create'
-      },
-      {
-        path: 'comms/posters/create',
-        name: 'posters',
-        component: PostersPage
+        redirect: '/comms/posters/manager'
       },
       {
         path: 'comms/posters/manager',

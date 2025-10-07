@@ -27,12 +27,12 @@ export async function getAllPoster(
           createdBy
           updatedBy
           isDraft
-          user{
-          userId
-        fullName
-        dob
-        avatar
-        roleName
+          user {
+            userId
+            fullName
+            dob
+            avatar
+            roleName
           }
         }
         totalElements
@@ -54,3 +54,4 @@ export async function getAllPoster(
     throw error;
   }
 }
+
