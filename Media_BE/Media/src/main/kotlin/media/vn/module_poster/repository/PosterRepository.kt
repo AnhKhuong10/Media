@@ -18,6 +18,7 @@ interface PosterRepository : JpaRepository<Poster, Long> {
        OR LOWER(CAST(p.company_name AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%'))
        OR LOWER(CAST(p.content AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%'))
        OR LOWER(CAST(p.created_by AS TEXT)) LIKE LOWER(CONCAT('%', :search, '%')))
+    ORDER BY p.poster_id
 """, nativeQuery = true)
     fun getListPoster(
         @Param("search") search: String?,
