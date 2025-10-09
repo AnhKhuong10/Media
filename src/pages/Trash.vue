@@ -40,9 +40,10 @@ function restorePhoto(photo) {
   // Xóa ảnh cũ (nếu tồn tại trong danh sách chính)
   photos.value = photos.value.filter(p => p.id !== photo.id)
 
-  // ✅ Giữ nguyên trạng thái yêu thích (không reset liked)
+  // ✅ Khi khôi phục, bỏ dấu yêu thích
   photos.value.unshift({
     ...photo,
+    liked: false,      // reset lại trạng thái yêu thích
     deletedAt: null
   })
 
