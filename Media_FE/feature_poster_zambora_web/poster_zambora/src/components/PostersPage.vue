@@ -4,11 +4,11 @@
     <div class="card-bd">
       <div class="toolbar" style="margin-bottom: 12px">
         <template v-if="mode === 'create'">
-          <SaveButton label="Save" icon="pi pi-save" @click="save()" />
-          <ExportButton @click="exportPng" />
+          <BaseButton label="Lưu" icon="pi pi-save" color="primary" size="md" @click="save" />
+          <BaseButton label="Tải xuống" icon="pi pi-download" color="danger" size="md" @click="exportPng" />
         </template>
         <template v-else>
-          <UpdateButton @click="update" />
+          <BaseButton label="Cập nhật" icon="pi pi-refresh" color="danger" size="md" @click="update" />
         </template>
       </div>
 
@@ -160,6 +160,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed, watch, onMounted } from "vue";
+import BaseButton from "./BaseButton.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import html2canvas from "html2canvas";
@@ -329,7 +330,7 @@ function selectUser(user: User) {
   showModal.value = false;
 }
 
-const activeTemplate = ref(poster.posterType|| "new_employee");
+const activeTemplate = ref(poster.posterType || "new_employee");
 
 watch(activeTemplate, (val) => {
   poster.posterType = val; // đồng bộ khi đổi select box

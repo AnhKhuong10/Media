@@ -7,22 +7,15 @@
         <span class="muted">{{ totalElements }} bản ghi</span>
       </div>
       <div class="hd-right">
-        <button class="btn primary" @click="showModalCreate = true">
-          <i class="pi pi-plus"></i> Tạo mới
-        </button>
-        <button class="btn danger"><i class="pi pi-trash"></i> Thùng rác</button>
+        <BaseButton label="Tạo mới" icon="pi pi-plus" color="primary" @click="showModalCreate = true" />
+        <BaseButton label="Thùng rác" icon="pi pi-trash" color="danger" @click="showModalCreate = true" />
       </div>
     </header>
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input
-        v-model="q"
-        type="search"
-        class="input"
-        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
-        @input="onSearch"
-      />
+      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
+        @input="onSearch" />
       <!-- <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
       <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label> -->
       <select v-model="styleFilter" class="select" style="width: 35%">
@@ -49,16 +42,8 @@
         </thead>
 
         <tbody>
-          <poster
-            v-for="(p, index) in posters"
-            :key="p.posterId"
-            :poster="p"
-            :index="index + 1"
-            mode="manager"
-            @view="onView"
-            @edit="onEdit"
-            @delete="onDelete"
-          />
+          <poster v-for="(p, index) in posters" :key="p.posterId" :poster="p" :index="index + 1" mode="manager"
+            @view="onView" @edit="onEdit" @delete="onDelete" />
           <tr v-if="posters.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -78,19 +63,11 @@
 
       <span class="muted">Trang {{ pageNumber + 1 }} / {{ totalPages }}</span>
 
-      <button
-        class="btn sm"
-        :disabled="pageNumber >= totalPages - 1"
-        @click="pageNumber++"
-      >
+      <button class="btn sm" :disabled="pageNumber >= totalPages - 1" @click="pageNumber++">
         ›
       </button>
 
-      <button
-        class="btn sm"
-        :disabled="pageNumber >= totalPages - 1"
-        @click="pageNumber = totalPages - 1"
-      >
+      <button class="btn sm" :disabled="pageNumber >= totalPages - 1" @click="pageNumber = totalPages - 1">
         »
       </button>
     </footer>
@@ -99,18 +76,13 @@
     <div v-if="showModalPreview" class="modal-backdrop" @click="showModalPreview = false">
       <div class="modal-preview" @click.stop>
         <div class="modal-hd">
-          <button class="btn" @click="showModalPreview = false">Đóng</button>
+          <BaseButton label="Đóng" icon="pi pi-times" color="gray" size="sm" @click="showModalPreview = false" />
         </div>
         <div class="modal-body">
           <!-- Khung preview (tỉ lệ poster) -->
           <div class="poster-preview-shell">
             <div class="poster-preview-surface">
-              <component
-                v-if="previewForm"
-                :is="previewComponent"
-                :form="previewForm"
-                :preview-photo="previewPhoto"
-              />
+              <component v-if="previewForm" :is="previewComponent" :form="previewForm" :preview-photo="previewPhoto" />
             </div>
           </div>
         </div>
@@ -121,14 +93,10 @@
     <div v-if="showModalEdit" class="modal-backdrop" @click="showModalEdit = false">
       <div class="modal-edit" @click.stop>
         <div class="modal-hd">
-          <button class="btn" @click="showModalEdit = false">Đóng</button>
+          <BaseButton label="Đóng" icon="pi pi-times" color="gray" size="sm" @click="showModalEdit = false" />
         </div>
         <div class="modal-body">
-          <PostersPage
-            :posterData="editingPoster"
-            mode="edit"
-            @update-success="onUpdateSuccess"
-          />
+          <PostersPage :posterData="editingPoster" mode="edit" @update-success="onUpdateSuccess" />
         </div>
       </div>
     </div>
@@ -137,7 +105,7 @@
     <div v-if="showModalCreate" class="modal-backdrop" @click="showModalCreate = false">
       <div class="modal-edit" @click.stop>
         <div class="modal-hd">
-          <button class="btn" @click="showModalCreate = false">Đóng</button>
+          <BaseButton label="Đóng" icon="pi pi-times" color="gray" size="sm" @click="showModalCreate = false" />
         </div>
         <div class="modal-body">
           <PostersPage mode="create" @create-success="onCreateSuccess" />
@@ -149,7 +117,7 @@
     <div v-if="showModalDelete" class="modal-backdrop" @click="showModalDelete = false">
       <div class="modal-edit" @click.stop>
         <div class="modal-hd">
-          <button class="btn" @click="showModalDelete = false">Đóng</button>
+          <BaseButton label="Đóng" icon="pi pi-times" color="gray" size="sm" @click="showModalDelete = false" />
         </div>
         <div class="modal-body">
           <PostersPage mode="create" @create-success="onCreateSuccess" />
@@ -162,6 +130,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import poster from "../components/PosterTable.vue";
+import BaseButton from "../components/BaseButton.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import PostersPage from "../components/PostersPage.vue";
@@ -231,7 +200,7 @@ const previewPhoto = ref<string>(defaultLogo);
 const showModalEdit = ref(false);
 const showModalPreview = ref(false);
 const showModalCreate = ref(false);
-const showModalDelte = ref(false);
+const showModalDelete = ref(false);
 
 const editingPoster = ref<PosterDTO | null>(null); // dữ liệu poster đang edit
 
@@ -614,20 +583,6 @@ function onDelete(p: Poster) {
   background: #f9fafb;
 }
 
-/* Nút đóng */
-.btn {
-  background: #e5e7eb;
-  border: none;
-  color: #111;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn:hover {
-  background: #d1d5db;
-}
 
 /* Body modal */
 .modal-body {
@@ -656,6 +611,7 @@ function onDelete(p: Poster) {
   align-items: center;
   justify-content: center;
 }
+
 .hd-left {
   display: flex;
   flex-direction: column;
@@ -677,12 +633,5 @@ function onDelete(p: Poster) {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.btn.danger {
-  background-color: #ef4444; /* đỏ */
-  color: white;
-}
-.btn.danger:hover {
-  background-color: #dc2626;
 }
 </style>
