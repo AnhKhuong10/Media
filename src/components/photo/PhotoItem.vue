@@ -23,7 +23,7 @@
 
         <transition name="fade">
           <div v-if="menuVisible" class="menu">
-            <div class="menu-item" @click="() => { emitShare(photo); closeMenu() }">
+            <div class="menu-item" @click="() => { openShareModal(photo); closeMenu() }">
               <span class="mi">📤</span>
               <span class="ml">Chia sẻ</span>
             </div>
@@ -67,13 +67,28 @@
         <button class="close-btn" @click="closeAlbumModal">Đóng</button>
       </div>
     </div>
+
+    <!-- 🔗 Popup chia sẻ -->
+    <div v-if="showShareModal" class="modal-overlay" @click.self="closeShareModal">
+      <div class="modal">
+        <h3>Chia sẻ ảnh</h3>
+        <p><strong>{{ photo.name }}</strong></p>
+
+        <div class="share-options">
+          <button @click="copyLink(photo)">🔗 Sao chép đường link</button>
+          <button @click="shareFacebook(photo)">👍 Chia sẻ lên Facebook</button>
+        </div>
+
+        <button class="close-btn" @click="closeShareModal">Đóng</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const emit = defineEmits(['delete-photo', 'toggle-like', 'share-photo'])
+const emit = defineEmits(['delete-photo', 'toggle-like'])
 
 const props = defineProps({
   photo: {
@@ -84,6 +99,7 @@ const props = defineProps({
 
 const menuVisible = ref(false)
 const showAlbumModal = ref(false)
+const showShareModal = ref(false)
 const selectedPhoto = ref(null)
 const newAlbumName = ref('')
 const albums = ref([
@@ -112,9 +128,6 @@ onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside))
 function emitDelete(photo) {
   emit('delete-photo', photo)
 }
-function emitShare(photo) {
-  emit('share-photo', photo)
-}
 function toggleFavorite(photo) {
   emit('toggle-like', photo)
 }
@@ -138,6 +151,28 @@ function createNewAlbum() {
   albums.value.push(newAlbum)
   alert(`Đã tạo album "${newAlbum.name}" và thêm ảnh vào đó`)
   closeAlbumModal()
+}
+
+// 🟦 Modal chia sẻ
+function openShareModal(photo) {
+  selectedPhoto.value = photo
+  showShareModal.value = true
+}
+function closeShareModal() {
+  showShareModal.value = false
+}
+
+// 🔗 Chia sẻ đường link
+function copyLink(photo) {
+  const link = photo.url
+  navigator.clipboard.writeText(link)
+  alert('Đã sao chép đường link ảnh vào clipboard!')
+}
+
+// 👍 Chia sẻ lên Facebook
+function shareFacebook(photo) {
+  const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(photo.url)}`
+  window.open(shareUrl, '_blank')
 }
 </script>
 
@@ -229,7 +264,7 @@ function createNewAlbum() {
 .menu-item.delete { color: #dc2626; }
 .mi { width: 22px; text-align: center; }
 
-/* modal album */
+/* modal chung */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -251,43 +286,21 @@ function createNewAlbum() {
   gap: 12px;
 }
 
-.album-list {
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #eee;
-  border-radius: 8px;
-}
-
-.album-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #f3f3f3;
-}
-.album-item:hover {
-  background: #f6f8ff;
-}
-
-.new-album {
+.share-options {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
 }
-
-.new-album input {
-  flex: 1;
-  padding: 6px 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.new-album button {
+.share-options button {
   background: #007bff;
-  color: #fff;
+  color: white;
   border: none;
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 8px 10px;
   cursor: pointer;
+  font-size: 0.95rem;
 }
-.new-album button:hover {
+.share-options button:hover {
   background: #0056b3;
 }
 
