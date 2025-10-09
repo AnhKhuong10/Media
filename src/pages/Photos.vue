@@ -14,19 +14,23 @@ import { ref } from 'vue'
 import { photoData } from '../graphql/FakeData.js'
 import PhotoListFormLineXn from '../components/photo/PhotoListFormLineXn.vue'
 
-const imgNull = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9HCTh-hWpcMY7Ka0ieXhioeEf5SSpIPQ6NA&s'
-const favorites = ref()
-
-favorites.value = photoData.data.getUserPhotos
-console.log('test favorites : ', favorites.value)
+const favorites = ref(photoData.data.getUserPhotos)
 </script>
 
 <style scoped>
 .page-title {
-  font-size: 1.2rem;
+  font-size: 1.8rem;
+  font-weight: 700;
   margin-bottom: 1rem;
-  font-weight: 600;
+
+  background: linear-gradient(90deg, #4285f4, #ea4335, #fbbc05, #34a853);
+  background-clip: text;
+  color: transparent;
+
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.5px;
 }
+
 
 .photo-grid {
   width: 100%;
