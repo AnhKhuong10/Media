@@ -24,4 +24,7 @@ interface PosterRepository : JpaRepository<Poster, Long> {
         @Param("search") search: String?,
         pageable: Pageable
     ): Page<Poster>
+
+    @Query("SELECT p FROM Poster p where p.isDeleted = true order by p.posterId")
+    fun getListPosterDelete(): List<Poster>
 }

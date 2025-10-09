@@ -40,4 +40,9 @@ class PosterQuery(
         val result = posterService.getPagePosterForUser(search)
         return result
     }
+
+    @QueryMapping
+    fun getListPosterDelete(): List<PosterDTO>{
+        return posterService.getListPosterDelete()
+    }
 }

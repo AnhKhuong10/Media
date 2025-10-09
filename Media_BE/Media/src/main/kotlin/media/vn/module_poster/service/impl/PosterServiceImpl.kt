@@ -127,6 +127,11 @@ class PosterServiceImpl (
         return posters.map { it.toPosterDTO() }
     }
 
+    override fun getListPosterDelete(): List<PosterDTO> {
+        val posters = posterRepository.getListPosterDelete()
+        return posters.map { it.toPosterDTO() }
+    }
+
     private fun Poster.toPosterDTO()= PosterDTO (
         posterId = this.posterId,
         title= this.title,

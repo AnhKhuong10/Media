@@ -72,4 +72,5 @@ extend type Mutation{
 extend type Query {
     postersForHR(page: Int!, size: Int!,search: String): PosterPage
     postersForUser(search: String): [PosterDTO]
+    getListPosterDelete: [PosterDTO]
 }

@@ -55,3 +55,44 @@ export async function getAllPoster(
   }
 }
 
+export async function getAllPosterDelete(
+): Promise<PosterDTO[]> {
+  const GET_ALL_POSTER_DELETE = gql`
+    query () {
+      getListPosterDelete() {
+        posterId
+        title
+        content
+        posterType
+        companyName
+        createDate
+        updateDate
+        createdBy
+        updatedBy
+        isDraft
+        user {
+            userId
+            fullName
+            dob
+            homeTown
+            avatar
+            roleName
+        }
+      }
+    }
+  `;
+  try {
+    const { data } = await apolloClient.query({
+      query: GET_ALL_POSTER_DELETE,
+      fetchPolicy: "no-cache",
+    });
+    return data.postersForHR;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách Poster:", error);
+    throw error;
+  }
+}
+
+
+
+

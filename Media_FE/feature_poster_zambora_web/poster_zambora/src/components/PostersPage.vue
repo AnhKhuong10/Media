@@ -232,6 +232,7 @@ const uploadedFile = ref<File | null>(null);
 const photoSource = ref<"default" | "uploaded">("default");
 const uploadedPhoto = ref<string | null>(null);
 
+const emit = defineEmits(["create-success", "update-success"]);
 async function save() {
   if (!poster.user?.userId) {
     alert("Vui lòng chọn nhân viên trước khi lưu Poster!");
@@ -248,12 +249,12 @@ async function save() {
   const res = await createPoster(posterCreateDTO.value, fileToUpload, isDraft.value);
   if (res) {
     alert(isDraft ? "Đã lưu bản nháp Poster!" : "Đã lưu thành công Poster!");
+    emit("create-success")
   }
 }
 // end Hàm lưu poster (gọi API)
 
 // Hàm update photo
-const emit = defineEmits(["update-success"]);
 async function update() {
   let fileToUpdate: File | undefined;
   // phải gán lại không thì sẽ bị mất
@@ -267,7 +268,6 @@ async function update() {
   if (res) {
     alert("Cập nhật Poster thành công!");
     emit("update-success");
-    console.log("🚀 Emit ra ngoài thành công");
   }
 }
 // end hàm update photo

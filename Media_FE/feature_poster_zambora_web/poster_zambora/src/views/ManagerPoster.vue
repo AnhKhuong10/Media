@@ -7,17 +7,25 @@
         <span class="muted">{{ totalElements }} bản ghi</span>
       </div>
       <div class="hd-right">
-        <button class="btn primary" @click="showModalCreate = true">Tạo mới</button>
+        <button class="btn primary" @click="showModalCreate = true">
+          <i class="pi pi-plus"></i> Tạo mới
+        </button>
+        <button class="btn danger"><i class="pi pi-trash"></i> Thùng rác</button>
       </div>
     </header>
 
     <!-- Toolbar -->
     <div class="toolbar">
-      <input v-model="q" type="search" class="input" placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
-        @input="onSearch" />
+      <input
+        v-model="q"
+        type="search"
+        class="input"
+        placeholder="Tìm theo tiêu đề, nội dung, người tạo…"
+        @input="onSearch"
+      />
       <!-- <label class="check"><input type="checkbox" v-model="draftOnly" /><span>Draft</span></label>
       <label class="check"><input type="checkbox" v-model="deletedOnly" /><span>Deleted</span></label> -->
-      <select v-model="styleFilter" class="select" style="width: 35%;">
+      <select v-model="styleFilter" class="select" style="width: 35%">
         <option value="">Tất cả kiểu</option>
         <option v-for="s in styleOptions" :key="s" :value="s">{{ s }}</option>
       </select>
@@ -41,8 +49,16 @@
         </thead>
 
         <tbody>
-          <poster v-for="(p, index) in posters" :key="p.posterId" :poster="p" :index="index + 1" @view="onView"
-            @edit="onEdit" @delete="onDelete" />
+          <poster
+            v-for="(p, index) in posters"
+            :key="p.posterId"
+            :poster="p"
+            :index="index + 1"
+            mode="manager"
+            @view="onView"
+            @edit="onEdit"
+            @delete="onDelete"
+          />
           <tr v-if="posters.length === 0">
             <td colspan="13" class="empty">Không có dữ liệu phù hợp.</td>
           </tr>
@@ -58,17 +74,23 @@
         «
       </button>
 
-      <button class="btn sm" :disabled="pageNumber === 0" @click="pageNumber--">
-        ‹
-      </button>
+      <button class="btn sm" :disabled="pageNumber === 0" @click="pageNumber--">‹</button>
 
       <span class="muted">Trang {{ pageNumber + 1 }} / {{ totalPages }}</span>
 
-      <button class="btn sm" :disabled="pageNumber >= totalPages - 1" @click="pageNumber++">
+      <button
+        class="btn sm"
+        :disabled="pageNumber >= totalPages - 1"
+        @click="pageNumber++"
+      >
         ›
       </button>
 
-      <button class="btn sm" :disabled="pageNumber >= totalPages - 1" @click="pageNumber = totalPages - 1">
+      <button
+        class="btn sm"
+        :disabled="pageNumber >= totalPages - 1"
+        @click="pageNumber = totalPages - 1"
+      >
         »
       </button>
     </footer>
@@ -83,7 +105,12 @@
           <!-- Khung preview (tỉ lệ poster) -->
           <div class="poster-preview-shell">
             <div class="poster-preview-surface">
-              <component v-if="previewForm" :is="previewComponent" :form="previewForm" :preview-photo="previewPhoto" />
+              <component
+                v-if="previewForm"
+                :is="previewComponent"
+                :form="previewForm"
+                :preview-photo="previewPhoto"
+              />
             </div>
           </div>
         </div>
@@ -97,7 +124,11 @@
           <button class="btn" @click="showModalEdit = false">Đóng</button>
         </div>
         <div class="modal-body">
-          <PostersPage :posterData="editingPoster" mode="edit" @update-success="onUpdateSuccess" />
+          <PostersPage
+            :posterData="editingPoster"
+            mode="edit"
+            @update-success="onUpdateSuccess"
+          />
         </div>
       </div>
     </div>
@@ -109,26 +140,37 @@
           <button class="btn" @click="showModalCreate = false">Đóng</button>
         </div>
         <div class="modal-body">
-          <PostersPage mode="create" />
+          <PostersPage mode="create" @create-success="onCreateSuccess" />
         </div>
       </div>
     </div>
 
+    <!-- modal poster delete -->
+    <div v-if="showModalDelete" class="modal-backdrop" @click="showModalDelete = false">
+      <div class="modal-edit" @click.stop>
+        <div class="modal-hd">
+          <button class="btn" @click="showModalDelete = false">Đóng</button>
+        </div>
+        <div class="modal-body">
+          <PostersPage mode="create" @create-success="onCreateSuccess" />
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import poster from "../components/Poster.vue";
+import poster from "../components/PosterTable.vue";
 import PosterNewHire from "../components/PosterNewHire.vue";
 import PosterRecognition from "../components/PosterRecognition.vue";
 import PostersPage from "../components/PostersPage.vue";
-import type { Poster, PosterDTO, PosterPage, PosterUpdateDTO } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
+import type { Poster, PosterDTO, PosterPage } from "../model/poster"; // nếu chưa có, xem chú thích ở cuối
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import { IMAGE_URL } from "../api/configService";
 
 // lấy danh sách poster
-import { getAllPoster } from "../api/graphql/poster-service-graphql";
+import { getAllPoster, getAllPosterDelete } from "../api/graphql/poster-service-graphql";
 import { PosterType } from "../model/poster";
 const pageNumber = ref(0);
 const pageSize = ref(10);
@@ -162,7 +204,7 @@ let searchTimer: number | undefined;
 function onSearch() {
   clearTimeout(searchTimer);
   searchTimer = window.setTimeout(() => {
-    pageNumber.value = 0; // reset về trang đầu khi tìm
+    pageNumber.value = 0;
     fetchPosters();
   }, 200);
 }
@@ -172,10 +214,24 @@ watch(pageNumber, () => {
 });
 // end
 
+// Modal poster delete
+async function fetchPostersDelete() {
+  try {
+    loading.value = true;
+    const posterDelete: PosterPage = await getAllPosterDelete();
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách Poster:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+// end
+
 const previewPhoto = ref<string>(defaultLogo);
 const showModalEdit = ref(false);
 const showModalPreview = ref(false);
 const showModalCreate = ref(false);
+const showModalDelte = ref(false);
 
 const editingPoster = ref<PosterDTO | null>(null); // dữ liệu poster đang edit
 
@@ -237,8 +293,11 @@ function onEdit(p: PosterDTO) {
   showModalEdit.value = true;
 }
 function onUpdateSuccess() {
-  console.log("✅ Nhận emit thành công từ con!");
   showModalEdit.value = false;
+  fetchPosters();
+}
+function onCreateSuccess() {
+  showModalCreate.value = false;
   fetchPosters();
 }
 function onDelete(p: Poster) {
@@ -596,5 +655,34 @@ function onDelete(p: Poster) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.hd-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hd-left h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.hd-left .muted {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.hd-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn.danger {
+  background-color: #ef4444; /* đỏ */
+  color: white;
+}
+.btn.danger:hover {
+  background-color: #dc2626;
 }
 </style>

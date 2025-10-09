@@ -4,29 +4,34 @@
     <td class="content">{{ poster.posterId }}</td>
     <td class="content">{{ poster.title }}</td>
     <td class="content">{{ poster.content }}</td>
-    <td class="content">{{ poster.createDate }}</td>
+    <td class="content">{{ formatDate(poster.createDate) }}</td>
     <td class="content">{{ poster.createdBy }}</td>
     <td class="content">{{ poster.isDraft }}</td>
     <td class="content">{{ poster.posterType }}</td>
     <td class="content">
-      <div class="dropdown">
-        <!-- Dấu ba chấm dọc -->
-        <button class="dots-btn" @click="toggleMenu(poster.posterId)">
-          <i class="pi pi-ellipsis-v"></i>
-        </button>
-        <!-- Menu tùy chọn (ẩn đi, chỉ hiện khi ấn vào dấu ba chấm) -->
-        <div v-if="activeMenu === poster.posterId" class="dropdown-menu">
-          <button class="menu-btn" @click="$emit('view', poster)">
-            <i class="pi pi-eye" style="padding-right: 2px"></i>View
+      <template v-if="mode === 'manager'">
+        <div class="dropdown">
+          <!-- Dấu ba chấm dọc -->
+          <button class="dots-btn" @click="toggleMenu(poster.posterId)">
+            <i class="pi pi-ellipsis-v"></i>
           </button>
-          <button class="menu-btn" @click="$emit('edit', poster)">
-            <i class="pi pi-pencil" style="padding-right: 2px"></i>Edit
-          </button>
-          <button class="menu-btn" @click="$emit('delete', poster)" style="color: red">
-            <i class="pi pi-trash" style="color: red; padding-right: 2px"></i>Delete
-          </button>
+          <!-- Menu tùy chọn (ẩn đi, chỉ hiện khi ấn vào dấu ba chấm) -->
+          <div v-if="activeMenu === poster.posterId" class="dropdown-menu">
+            <button class="menu-btn" @click="$emit('view', poster)">
+              <i class="pi pi-eye" style="padding-right: 2px"></i>View
+            </button>
+            <button class="menu-btn" @click="$emit('edit', poster)">
+              <i class="pi pi-pencil" style="padding-right: 2px"></i>Edit
+            </button>
+            <button class="menu-btn" @click="$emit('delete', poster)" style="color: red">
+              <i class="pi pi-trash" style="color: red; padding-right: 2px"></i>Delete
+            </button>
+          </div>
         </div>
-      </div>
+      </template>
+      <template v-if="mode === 'delete'">
+      
+      </template>
     </td>
   </tr>
 </template>
@@ -38,12 +43,25 @@ import type { PosterDTO } from "../model/poster"; // ✅ Dùng lại type đã c
 const props = defineProps<{
   poster: PosterDTO;
   index: number;
+  mode: "manager" | "delete";
 }>();
 console.log("Poster item:", props.poster); // ✅ In dữ liệu mỗi dòng
 const activeMenu = ref<number | null>(null);
 function toggleMenu(posterId: number) {
   // Nếu menu đang mở thì đóng lại, ngược lại mở menu mới
   activeMenu.value = activeMenu.value === posterId ? null : posterId;
+}
+function formatDate(date: string | undefined) {
+  if (!date) {
+    return ""; // Trả về chuỗi rỗng nếu date là undefined hoặc null
+  }
+
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
 }
 </script>
 
@@ -90,7 +108,6 @@ function toggleMenu(posterId: number) {
 .dots-btn:hover span {
   background-color: #555; /* Màu sắc thay đổi khi hover */
 }
-
 
 .dropdown-menu {
   position: absolute;
