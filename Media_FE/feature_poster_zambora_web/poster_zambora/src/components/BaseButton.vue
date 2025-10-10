@@ -4,7 +4,6 @@
     :class="[color, sizeClass]"
     :style="customStyle"
     type="button"
-    @click="$emit('click')"
   >
     <i v-if="icon" :class="['btn-icon', icon]" />
     <span class="btn-label">{{ label }}</span>
@@ -15,7 +14,7 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  label: { type: String, required: true },
+  label: { type: String, required: false },
   icon: { type: String, default: '' },
   color: { type: String, default: '' }, // primary, danger, success...
   size: { type: String, default: 'md' }, // sm, md, lg
@@ -56,8 +55,8 @@ const customStyle = computed(() => {
   font-weight: 750;
   transition: 0.2s ease-in-out;
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 6px;
 }
 

@@ -36,7 +36,6 @@ export async function updatePoster(
   poster: Partial<PosterDTO>,
   file?: File
 ): Promise<PosterDTO | null> {
-  console.log(poster.posterId + "===============")
   try {
     const formData = new FormData();
 

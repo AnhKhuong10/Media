@@ -27,6 +27,7 @@
               <i class="pi pi-trash" style="color: red; padding-right: 2px"></i>Delete
             </button>
           </div>
+
         </div>
       </template>
       <template v-if="mode === 'delete'">

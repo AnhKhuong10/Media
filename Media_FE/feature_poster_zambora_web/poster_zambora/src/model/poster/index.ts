@@ -1,5 +1,5 @@
 
-
+import type { ReactionEnum } from "../poster-reaction";
 export type Poster = {
   posterId: number;
   title: string;
@@ -53,6 +53,8 @@ export type PosterDTO = {
   createdBy: string
   updatedBy: string
   isDraft: boolean
+  reaction: ReactionEnum
+  reactionCount: number
   user: UserPoster
 }
 

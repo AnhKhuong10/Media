@@ -92,7 +92,46 @@ export async function getAllPosterDelete(
     throw error;
   }
 }
+export async function getPostersForUser(search: string = ""): Promise<PosterDTO[]> {
+  const GET_POSTERS_FOR_USER = gql`
+    query PostersForUser($search: String) {
+      postersForUser(search: $search) {
+        posterId
+        title
+        content
+        posterType
+        companyName
+        createDate
+        updateDate
+        createdBy
+        updatedBy
+        isDraft
+        user {
+            userId
+            fullName
+            dob
+            homeTown
+            avatar
+            roleName
+        }
+      }
+    }
+  `;
 
+  try {
+    const { data } = await apolloClient.query({
+      query: GET_POSTERS_FOR_USER,
+      variables: { search },
+      fetchPolicy: "no-cache",
+    });
+
+    // 🔹 Trả về đúng data từ server
+    return data.postersForUser;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách Poster cho user:", error);
+    throw error;
+  }
+}
 
 
 

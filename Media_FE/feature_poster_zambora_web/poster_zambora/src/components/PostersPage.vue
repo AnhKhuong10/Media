@@ -4,11 +4,29 @@
     <div class="card-bd">
       <div class="toolbar" style="margin-bottom: 12px">
         <template v-if="mode === 'create'">
-          <BaseButton label="Lưu" icon="pi pi-save" color="primary" size="md" @click="save" />
-          <BaseButton label="Tải xuống" icon="pi pi-download" color="danger" size="md" @click="exportPng" />
+          <BaseButton
+            label="Lưu"
+            icon="pi pi-save"
+            color="primary"
+            size="md"
+            @click="save"
+          />
+          <BaseButton
+            label="Tải xuống"
+            icon="pi pi-download"
+            color="danger"
+            size="md"
+            @click="exportPng"
+          />
         </template>
         <template v-else>
-          <BaseButton label="Cập nhật" icon="pi pi-refresh" color="danger" size="md" @click="update" />
+          <BaseButton
+            label="Cập nhật"
+            icon="pi pi-refresh"
+            color="danger"
+            size="md"
+            @click="update"
+          />
         </template>
       </div>
 
@@ -19,21 +37,32 @@
           <div class="card-bd">
             <div class="field">
               <div class="horizontal">
-                <label>Loại Poster</label>
-                <select class="select" v-model="activeTemplate" style="width: 50%">
-                  <option value="new_employee">Nhân viên mới</option>
-                  <option value="honor">Vinh danh</option>
-                </select>
+                <label for="poster-type">Loại Poster</label>
+                <Dropdown
+                  id="poster-type"
+                  v-model="activeTemplate"
+                  :options="posterTypes"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Chọn loại poster"
+                  appendTo="self"
+                  class="w-full md:w-14rem"
+                />
               </div>
             </div>
             <div class="field">
               <div class="horizontal">
                 <label>Chọn nhân viên</label>
                 <div class="select-container">
-                  <button @click="showModal = true" class="btn">
-                    <i class="pi pi-user"></i>
-                    <!-- Icon nhân viên -->
-                  </button>
+                  <!-- Icon nhân viên -->
+                  <BaseButton
+                    icon="pi pi-user"
+                    color="gray"
+                    size="md"
+                    height="40px"
+                    width="40px"
+                    @click="showModal = true"
+                  />
                 </div>
               </div>
             </div>
@@ -41,29 +70,46 @@
               <div class="horizontal">
                 <label>Chọn ảnh đại diện</label>
                 <div class="select-container">
-                  <button @click="triggerFileUpload" class="btn">
-                    <i class="pi pi-upload"></i>
-                    <!-- Icon upload -->
-                  </button>
+                  <BaseButton
+                    icon="pi pi-upload"
+                    color="gray"
+                    size="md"
+                    height="40px"
+                    width="40px"
+                    @click="triggerFileUpload"
+                  />
                 </div>
-                <input type="file" id="fileInput" @change="handleFileUpload" style="display: none" />
+                <input
+                  type="file"
+                  id="fileInput"
+                  @change="handleFileUpload"
+                  style="display: none"
+                />
               </div>
             </div>
             <!-- Checkbox: Chọn ảnh từ nhân viên -->
             <div class="field">
               <div class="horizontal">
-                <label>Chọn ảnh từ nhân viên</label>
-                <input type="radio" v-model="photoSource" value="default" />
-                <!-- Chọn ảnh từ nhân viên -->
+                <label for="radio-default" class="ml-2">Chọn ảnh từ nhân viên</label>
+                <RadioButton
+                  inputId="radio-default"
+                  name="photoSource"
+                  value="default"
+                  v-model="photoSource"
+                />
               </div>
             </div>
 
             <!-- Checkbox: Chọn ảnh từ máy -->
             <div class="field">
               <div class="horizontal">
-                <label>Chọn ảnh từ máy</label>
-                <input type="radio" v-model="photoSource" value="uploaded" />
-                <!-- Chọn ảnh từ máy -->
+                <label for="radio-uploaded" class="ml-2">Chọn ảnh từ máy</label>
+                <RadioButton
+                  inputId="radio-uploaded"
+                  name="photoSource"
+                  value="uploaded"
+                  v-model="photoSource"
+                />
               </div>
             </div>
 
@@ -72,8 +118,7 @@
                 <div class="horizontal">
                   <label>Bản nháp</label>
                   <label class="switch">
-                    <input type="checkbox" v-model="isDraft" />
-                    <span class="slider"></span>
+                    <InputSwitch v-model="isDraft" />
                   </label>
                 </div>
               </div>
@@ -82,18 +127,27 @@
             <div class="grid-2">
               <div class="field">
                 <label>Tiêu đề</label>
-                <input class="input" v-model="poster.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" />
+                <InputText
+                  type="text"
+                  v-model="poster.title"
+                  placeholder="CHÀO MỪNG BẠN ĐẾN VỚI"
+                />
               </div>
               <div class="field">
                 <label>Tên công ty</label>
-                <input class="input" v-model="poster.companyName" placeholder="REVOTECH" />
+                <InputText
+                  type="text"
+                  v-model="poster.companyName"
+                  placeholder="REVOTECH"
+                  class="w-10rem"
+                />
               </div>
             </div>
 
             <div class="grid-4">
               <div class="field">
                 <label>Nội dung</label>
-                <textarea class="input" v-model="poster.content" placeholder="NỘI DUNG Ở ĐÂY" rows="4"></textarea>
+                <Textarea v-model="poster.content" rows="5" cols="30" />
               </div>
             </div>
           </div>
@@ -102,7 +156,12 @@
         <!-- Panel phải: Stage poster -->
         <div class="poster-shell">
           <div class="poster-surface" id="exportTarget">
-            <component :is="currentPoster" :form="poster" :preview-photo="previewPhoto" :key="activeTemplate" />
+            <component
+              :is="currentPoster"
+              :form="poster"
+              :preview-photo="previewPhoto"
+              :key="activeTemplate"
+            />
           </div>
         </div>
       </div>
@@ -113,46 +172,90 @@
   <div v-if="showModal" class="modal-backdrop" @click="showModal = false">
     <div class="modal" @click.stop>
       <div class="modal-hd">
-        <button @click="showModal = false" class="btn-red">Đóng</button>
+        <BaseButton
+          label="Đóng"
+          icon="pi pi-times"
+          color="danger"
+          @click="showModal = false"
+        />
       </div>
       <div class="modal-body">
         <!-- Thanh tìm kiếm -->
-        <div class="horizontal">
-          <input type="text" v-model="searchQuery" placeholder="Tìm kiếm theo tên..." class="search-bar" />
-          <div class="sort-buttons">
-            <button @click="sortByDateAscending">Ngày vào nhỏ -> lớn</button>
-            <button @click="sortByDateDescending">Ngày vào lớn -> nhỏ</button>
-          </div>
+        <div style="padding-bottom: 5px">
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-search" />
+            </InputIcon>
+            <InputText
+              v-model="searchQuery"
+              placeholder="Tìm kiếm"
+              class="pl-5 w-15rem h-2rem"
+            >
+            </InputText>
+          </IconField>
         </div>
         <!-- Bảng người dùng -->
-        <div class="modal-grid">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Tên</th>
-                <th>Email</th>
-                <th>Ngày sinh</th>
-                <th>Quê quán</th>
-                <th>Vị trí</th>
-                <th>Ngày vào</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="user in filteredUsers" :key="user.userId">
-                <td>{{ user.fullName }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ formatDate(user.dob) }}</td>
-                <td>{{ user.homeTown }}</td>
-                <td>{{ user.roleName }}</td>
-                <td>{{ formatDate(user.createDate) }}</td>
-                <td>
-                  <button @click="selectUser(user)">Chọn</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          :value="filteredUsers"
+          dataKey="userId"
+          sortMode="multiple"
+          tableStyle="min-width: 60rem"
+          responsiveLayout="scroll"
+        >
+          <!-- Cột Tên -->
+          <Column field="fullName" header="Tên" sortable style="width: 15%">
+            <template #body="{ data }">
+              {{ data.fullName }}
+            </template>
+          </Column>
+
+          <!-- Cột Email -->
+          <Column field="email" header="Email" sortable style="width: 20%">
+            <template #body="{ data }">
+              <span class="text-sm text-gray-700">{{ data.email }}</span>
+            </template>
+          </Column>
+
+          <!-- Cột Ngày sinh -->
+          <Column field="dob" header="Ngày sinh" sortable style="width: 15%">
+            <template #body="{ data }">
+              {{ formatDate(data.dob) }}
+            </template>
+          </Column>
+
+          <!-- Cột Quê quán -->
+          <Column field="homeTown" header="Quê quán" sortable style="width: 15%">
+            <template #body="{ data }">
+              {{ data.homeTown }}
+            </template>
+          </Column>
+
+          <!-- Cột Vị trí -->
+          <Column field="roleName" header="Vị trí" sortable style="width: 15%">
+            <template #body="{ data }">
+              {{ data.roleName }}
+            </template>
+          </Column>
+
+          <!-- Cột Ngày vào -->
+          <Column field="createDate" header="Ngày vào" sortable style="width: 15%">
+            <template #body="{ data }">
+              {{ formatDate(data.createDate) }}
+            </template>
+          </Column>
+
+          <!-- Cột hành động -->
+          <Column header="Thao tác" style="width: 8%; text-align: center">
+            <template #body="{ data }">
+              <BaseButton
+                label="Chọn"
+                size="sm"
+                color="primary"
+                @click="selectUser(data)"
+              />
+            </template>
+          </Column>
+        </DataTable>
       </div>
     </div>
   </div>
@@ -177,17 +280,22 @@ const props = withDefaults(
     mode: "create",
   }
 );
+const posterTypes = [
+  { label: "Nhân viên mới", value: "new_employee" },
+  { label: "Vinh danh", value: "honor" },
+];
+
 const isDraft = ref(props.posterData?.isDraft ?? false);
 const poster = reactive(
   props.posterData
     ? { ...props.posterData }
     : {
-      posterType: "new_employee",
-      title: "CHÀO MỪNG BẠN ĐẾN VỚI",
-      content: "NỘI DUNG Ở ĐÂY",
-      companyName: "TÊN CÔNG TY",
-      user: {} as User,
-    }
+        posterType: "new_employee",
+        title: "CHÀO MỪNG BẠN ĐẾN VỚI",
+        content: "NỘI DUNG Ở ĐÂY",
+        companyName: "TÊN CÔNG TY",
+        user: {} as User,
+      }
 );
 const previewPhoto = ref<string>(
   props.posterData?.user?.avatar
@@ -250,7 +358,7 @@ async function save() {
   const res = await createPoster(posterCreateDTO.value, fileToUpload, isDraft.value);
   if (res) {
     alert(isDraft ? "Đã lưu bản nháp Poster!" : "Đã lưu thành công Poster!");
-    emit("create-success")
+    emit("create-success");
   }
 }
 // end Hàm lưu poster (gọi API)
@@ -263,7 +371,7 @@ async function update() {
   if (photoSource.value === "uploaded" && uploadedFile.value) {
     fileToUpdate = uploadedFile.value;
   }
-  console.log(poster.isDraft + "before send")
+  console.log(poster.isDraft + "before send");
   // Gọi API update thật
   const res = await updatePoster(poster, fileToUpdate);
   if (res) {
@@ -363,7 +471,7 @@ async function exportPng() {
   }
 
   // Nếu phần tử tồn tại, tiếp tục với việc vẽ canvas
-  const canvas = await html2canvas(el, { backgroundColor: "#fff", scale: 2 });
+  const canvas = await html2canvas(el, { backgroundColor: "#fff" });
 
   const a = document.createElement("a");
   a.download = `${activeTemplate.value}-${poster.user.fullName || "poster"}.png`;
@@ -408,36 +516,6 @@ async function exportPng() {
   display: inline-block;
 }
 
-/* Dropdown ẩn mặc định */
-.upload-wrap .dropdown {
-  list-style: none;
-  margin: 0;
-  padding: 6px 0;
-  position: absolute;
-  top: 0;
-  /* cùng hàng với nút + */
-  left: 105%;
-  /* dịch sang phải đúng bằng chiều rộng nút */
-  min-width: 180px;
-  background: #fff;
-  color: #0b1220;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(6px);
-  /* hiệu ứng đẩy nhẹ sang phải */
-  transition: all 0.18s ease;
-  z-index: 20;
-}
-
-/* Hover vào toàn bộ .upload-wrap mới hiện menu */
-.upload-wrap:hover .dropdown {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(0);
-}
-
 /* Style từng option */
 .upload-wrap .dropdown li {
   padding: 10px 12px;
@@ -460,7 +538,7 @@ async function exportPng() {
 }
 
 .modal {
-  width: min(90vw, 950px);
+  width: min(90vw, 1000px);
   background: #fff;
   color: black;
   border-radius: 16px;
@@ -469,10 +547,7 @@ async function exportPng() {
 }
 
 .modal-hd {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  margin-left: 800px;
+  margin-left: 870px;
 }
 
 .modal-grid {
@@ -603,31 +678,6 @@ async function exportPng() {
   font-size: 13px;
 }
 
-.search-bar:focus {
-  outline: none;
-  border-color: #2563eb;
-  /* xanh giống màu nút */
-  box-shadow: 0 0 4px rgba(37, 99, 235, 0.5);
-}
-
-.sort-buttons {
-  margin-bottom: 20px;
-}
-
-.sort-buttons button {
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 10px;
-}
-
-.sort-buttons button:hover {
-  background-color: #1d4ed8;
-}
-
 .file-label {
   display: inline-flex;
   align-items: center;
@@ -673,11 +723,11 @@ async function exportPng() {
   border-radius: 50%;
 }
 
-input:checked+.slider {
+input:checked + .slider {
   background-color: #1d4ed8;
 }
 
-input:checked+.slider::before {
+input:checked + .slider::before {
   transform: translateX(22px);
 }
 </style>
