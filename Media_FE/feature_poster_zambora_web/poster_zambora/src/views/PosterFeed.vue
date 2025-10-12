@@ -8,8 +8,7 @@
 
     <!-- Danh sách poster -->
     <div v-else>
-    <iframe src="https://primevue.org/icons" width="600" height="400">
-    </iframe>
+
       <div v-for="poster in posters" :key="poster.posterId" class="feed-item">
         <!-- Header user -->
         <div class="feed-header">
@@ -65,8 +64,6 @@ import defaultAvatar from "@/assets/image-poster-banner/logo_revotech.png";
 import defaultLogo from "@/assets/image-poster-banner/logo_revotech.png";
 import type { PosterDTO, PosterType } from "../model/poster";
 import { ReactionEnum } from "../model/poster-reaction";
-import OverlayPanel from "primevue/overlaypanel";
-import Button from "primevue/button";
 
 // State
 const posters = ref<PosterDTO[]>([]);

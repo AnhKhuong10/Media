@@ -3,7 +3,6 @@
     <div class="top" :style="{ background: '#1d4ed8' }">
       <img :src="defaultLogo" alt="Zambora" style="position: absolute; top: 20px; left: 20px; width: 180px" />
       <div class="headline">{{ form.title }}</div>
-      <div class="headline">{{ form.companyName }}</div>
       <img src="@/assets/image-poster-banner/gold-stroke.jpg" alt="gold stroke" class="gold-stroke" />
     </div>
     <div style="display: flex; justify-content: center; margin-top: -250px">
@@ -61,8 +60,11 @@ function formatDate(date: string) {
 
 .headline {
   text-transform: uppercase;
+  white-space: pre-line;
   font-weight: 600;
   font-size: 40px;
+  text-align: center; /* 👈 thêm dòng này */
+  width: 100%;     
 }
 
 /* .brand {

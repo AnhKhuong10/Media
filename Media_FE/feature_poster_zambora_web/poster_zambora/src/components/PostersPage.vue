@@ -4,29 +4,11 @@
     <div class="card-bd">
       <div class="toolbar" style="margin-bottom: 12px">
         <template v-if="mode === 'create'">
-          <BaseButton
-            label="Lưu"
-            icon="pi pi-save"
-            color="primary"
-            size="md"
-            @click="save"
-          />
-          <BaseButton
-            label="Tải xuống"
-            icon="pi pi-download"
-            color="danger"
-            size="md"
-            @click="exportPng"
-          />
+          <BaseButton label="Lưu" icon="pi pi-save" color="primary" size="md" @click="save" />
+          <BaseButton label="Tải xuống" icon="pi pi-download" color="danger" size="md" @click="exportPng" />
         </template>
         <template v-else>
-          <BaseButton
-            label="Cập nhật"
-            icon="pi pi-refresh"
-            color="danger"
-            size="md"
-            @click="update"
-          />
+          <BaseButton label="Cập nhật" icon="pi pi-refresh" color="danger" size="md" @click="update" />
         </template>
       </div>
 
@@ -38,16 +20,8 @@
             <div class="field">
               <div class="horizontal">
                 <label for="poster-type">Loại Poster</label>
-                <Dropdown
-                  id="poster-type"
-                  v-model="activeTemplate"
-                  :options="posterTypes"
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Chọn loại poster"
-                  appendTo="self"
-                  class="w-full md:w-14rem"
-                />
+                <Dropdown id="poster-type" v-model="activeTemplate" :options="posterTypes" optionLabel="label"
+                  optionValue="value" placeholder="Chọn loại poster" appendTo="self" class="w-full md:w-14rem" />
               </div>
             </div>
             <div class="field">
@@ -55,14 +29,8 @@
                 <label>Chọn nhân viên</label>
                 <div class="select-container">
                   <!-- Icon nhân viên -->
-                  <BaseButton
-                    icon="pi pi-user"
-                    color="gray"
-                    size="md"
-                    height="40px"
-                    width="40px"
-                    @click="showModal = true"
-                  />
+                  <BaseButton icon="pi pi-user" color="gray" size="md" height="40px" width="40px"
+                    @click="showModal = true" />
                 </div>
               </div>
             </div>
@@ -70,33 +38,17 @@
               <div class="horizontal">
                 <label>Chọn ảnh đại diện</label>
                 <div class="select-container">
-                  <BaseButton
-                    icon="pi pi-upload"
-                    color="gray"
-                    size="md"
-                    height="40px"
-                    width="40px"
-                    @click="triggerFileUpload"
-                  />
+                  <BaseButton icon="pi pi-upload" color="gray" size="md" height="40px" width="40px"
+                    @click="triggerFileUpload" />
                 </div>
-                <input
-                  type="file"
-                  id="fileInput"
-                  @change="handleFileUpload"
-                  style="display: none"
-                />
+                <input type="file" id="fileInput" @change="handleFileUpload" style="display: none" />
               </div>
             </div>
             <!-- Checkbox: Chọn ảnh từ nhân viên -->
             <div class="field">
               <div class="horizontal">
                 <label for="radio-default" class="ml-2">Chọn ảnh từ nhân viên</label>
-                <RadioButton
-                  inputId="radio-default"
-                  name="photoSource"
-                  value="default"
-                  v-model="photoSource"
-                />
+                <RadioButton inputId="radio-default" name="photoSource" value="default" v-model="photoSource" />
               </div>
             </div>
 
@@ -104,12 +56,7 @@
             <div class="field">
               <div class="horizontal">
                 <label for="radio-uploaded" class="ml-2">Chọn ảnh từ máy</label>
-                <RadioButton
-                  inputId="radio-uploaded"
-                  name="photoSource"
-                  value="uploaded"
-                  v-model="photoSource"
-                />
+                <RadioButton inputId="radio-uploaded" name="photoSource" value="uploaded" v-model="photoSource" />
               </div>
             </div>
 
@@ -127,27 +74,15 @@
             <div class="grid-2">
               <div class="field">
                 <label>Tiêu đề</label>
-                <InputText
-                  type="text"
-                  v-model="poster.title"
-                  placeholder="CHÀO MỪNG BẠN ĐẾN VỚI"
-                />
-              </div>
-              <div class="field">
-                <label>Tên công ty</label>
-                <InputText
-                  type="text"
-                  v-model="poster.companyName"
-                  placeholder="REVOTECH"
-                  class="w-10rem"
-                />
+                <!-- <InputText type="text" v-model="poster.title" placeholder="CHÀO MỪNG BẠN ĐẾN VỚI" /> -->
+                <Textarea v-model="poster.title" autoResize  rows="3" cols="30" />
               </div>
             </div>
 
             <div class="grid-4">
               <div class="field">
                 <label>Nội dung</label>
-                <Textarea v-model="poster.content" rows="5" cols="30" />
+                <Textarea v-model="poster.content" autoResize rows="5" cols="30" />
               </div>
             </div>
           </div>
@@ -156,12 +91,7 @@
         <!-- Panel phải: Stage poster -->
         <div class="poster-shell">
           <div class="poster-surface" id="exportTarget">
-            <component
-              :is="currentPoster"
-              :form="poster"
-              :preview-photo="previewPhoto"
-              :key="activeTemplate"
-            />
+            <component :is="currentPoster" :form="poster" :preview-photo="previewPhoto" :key="activeTemplate" />
           </div>
         </div>
       </div>
@@ -172,12 +102,7 @@
   <div v-if="showModal" class="modal-backdrop" @click="showModal = false">
     <div class="modal" @click.stop>
       <div class="modal-hd">
-        <BaseButton
-          label="Đóng"
-          icon="pi pi-times"
-          color="danger"
-          @click="showModal = false"
-        />
+        <BaseButton label="Đóng" icon="pi pi-times" color="danger" @click="showModal = false" />
       </div>
       <div class="modal-body">
         <!-- Thanh tìm kiếm -->
@@ -186,22 +111,13 @@
             <InputIcon>
               <i class="pi pi-search" />
             </InputIcon>
-            <InputText
-              v-model="searchQuery"
-              placeholder="Tìm kiếm"
-              class="pl-5 w-15rem h-2rem"
-            >
+            <InputText v-model="searchQuery" placeholder="Tìm kiếm" class="pl-5 w-15rem h-2rem">
             </InputText>
           </IconField>
         </div>
         <!-- Bảng người dùng -->
-        <DataTable
-          :value="filteredUsers"
-          dataKey="userId"
-          sortMode="multiple"
-          tableStyle="min-width: 60rem"
-          responsiveLayout="scroll"
-        >
+        <DataTable :value="filteredUsers" dataKey="userId" sortMode="multiple" tableStyle="min-width: 60rem"
+          responsiveLayout="scroll">
           <!-- Cột Tên -->
           <Column field="fullName" header="Tên" sortable style="width: 15%">
             <template #body="{ data }">
@@ -247,12 +163,7 @@
           <!-- Cột hành động -->
           <Column header="Thao tác" style="width: 8%; text-align: center">
             <template #body="{ data }">
-              <BaseButton
-                label="Chọn"
-                size="sm"
-                color="primary"
-                @click="selectUser(data)"
-              />
+              <BaseButton label="Chọn" size="sm" color="primary" @click="selectUser(data)" />
             </template>
           </Column>
         </DataTable>
@@ -290,12 +201,12 @@ const poster = reactive(
   props.posterData
     ? { ...props.posterData }
     : {
-        posterType: "new_employee",
-        title: "CHÀO MỪNG BẠN ĐẾN VỚI",
-        content: "NỘI DUNG Ở ĐÂY",
-        companyName: "TÊN CÔNG TY",
-        user: {} as User,
-      }
+      posterType: "new_employee",
+      title: "CHÀO MỪNG BẠN ĐẾN VỚI",
+      content: "NỘI DUNG Ở ĐÂY",
+      companyName: "TÊN CÔNG TY",
+      user: {} as User,
+    }
 );
 const previewPhoto = ref<string>(
   props.posterData?.user?.avatar
@@ -471,7 +382,11 @@ async function exportPng() {
   }
 
   // Nếu phần tử tồn tại, tiếp tục với việc vẽ canvas
-  const canvas = await html2canvas(el, { backgroundColor: "#fff" });
+  const canvas = await html2canvas(el, {
+    backgroundColor: "#fff",
+    useCORS: true,
+    scale: 2
+  });
 
   const a = document.createElement("a");
   a.download = `${activeTemplate.value}-${poster.user.fullName || "poster"}.png`;
@@ -723,11 +638,11 @@ async function exportPng() {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #1d4ed8;
 }
 
-input:checked + .slider::before {
+input:checked+.slider::before {
   transform: translateX(22px);
 }
 </style>
