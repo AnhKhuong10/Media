@@ -8,6 +8,7 @@ import media.vn.module_poster.domain.entity.User
 import media.vn.module_poster.repository.PosterRepository
 import media.vn.module_poster.repository.UserRepository
 import media.vn.module_poster.service.FileService
+import media.vn.module_poster.service.PosterReactionService
 import media.vn.module_poster.service.PosterService
 import media.vn.utils.exception.BusinessException
 import media.vn.utils.exception.ErrorCode
@@ -29,6 +30,7 @@ class PosterServiceImpl (
     private val posterRepository: PosterRepository,
     private val userRepository: UserRepository,
     private val fileService: FileService,
+    private val posterReactionService: PosterReactionService
 ) : PosterService {
 
     val uploadDir = Paths.get("src/main/resources/static/images")
@@ -124,7 +126,15 @@ class PosterServiceImpl (
 
     override fun getPagePosterForUser(search: String?): List<PosterDTO> {
         val posters = posterRepository.getListPoster(search, Pageable.unpaged()).content
-        return posters.map { it.toPosterDTO() }
+        val posterDtos = posters.map { it.toPosterDTO() }
+
+        val ids = posterDtos.mapNotNull { it.posterId }
+        val summaries = posterReactionService.findSummaryByPosterIds(ids)
+
+        return posterDtos.map { dto ->
+            dto.copy(reactionSummary = summaries[dto.posterId] ?: emptyList())
+        }
+
     }
 
     private fun Poster.toPosterDTO()= PosterDTO (

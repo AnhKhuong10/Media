@@ -74,6 +74,42 @@ class PosterReactionServiceImpl(
             }
     }
 
+    override fun findSummaryByPosterIds(ids: List<Long>): Map<Long, List<ReactionSummaryDTO>> {
+        if (ids.isEmpty()) return emptyMap()
+
+        val reactions = posterReactionRepository.findByPosterIds(ids)
+
+        val groupedByPoster = reactions.groupBy { it.poster.posterId }
+
+        val summariesByPoster = mutableMapOf<Long, List<ReactionSummaryDTO>>()
+
+        for ((posterId, reactionList) in groupedByPoster) {
+            // Bước 1: nhóm các reaction giống nhau (LIKE, LOVE, HAHA)
+            val groupedByReaction = reactionList.groupingBy { it.posterReaction }
+
+            // Bước 2: đếm số lượng mỗi loại reaction
+            val countByReaction = groupedByReaction.eachCount()
+
+            // Bước 3: chuyển sang DTO
+            val reactionSummaries = countByReaction.map { (reaction, count) ->
+                ReactionSummaryDTO(reaction, count.toLong())
+            }
+
+            // Bước 4: thêm vào map kết quả
+            summariesByPoster[posterId] = reactionSummaries
+        }
+
+
+        return summariesByPoster
+    }
+
+    override fun findSummaryReactionsByPosterIds(ids: List<Long>): Map<Long, Long> {
+        if (ids.isEmpty()) return emptyMap()
+        val reactions = posterReactionRepository.findByPosterIds(ids)
+        val groupedByPoster = reactions.groupBy { it.poster.posterId }
+        return groupedByPoster.mapValues { (_, reactionList)
+        -> reactionList.size.toLong() }
+    }
 
     private fun PosterReaction.toDTO(): PosterReactionDTO {
         return PosterReactionDTO(

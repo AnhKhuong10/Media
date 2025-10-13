@@ -64,7 +64,6 @@ class FileServiceImpl : FileService {
         // Đảm bảo thư mục tồn tại
         val dirUri = URI("$baseURI$folder")
         createDirectory(dirUri.toString())
-
         // Copy file vào thư mục
         multipartFile.inputStream.use { input: InputStream ->
             Files.copy(input, path, StandardCopyOption.REPLACE_EXISTING)

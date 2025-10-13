@@ -10,4 +10,8 @@ interface PosterReactionService {
     fun countReactions(posterId: Long, reaction: ReactionEnum): Long
     fun getReactionsForPoster(posterId: Long): List<PosterReactionDTO>
     fun getReactionSummary(posterId: Long): List<ReactionSummaryDTO>
+
+    fun findSummaryByPosterIds(ids: List<Long>): Map<Long, List<ReactionSummaryDTO>>
+
+    fun findSummaryReactionsByPosterIds(ids: List<Long>): Map<Long, Long>
 }
