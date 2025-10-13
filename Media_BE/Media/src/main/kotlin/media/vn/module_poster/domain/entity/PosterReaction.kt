@@ -17,9 +17,8 @@ data class PosterReaction(
     @JoinColumn(name = "poster_id")
     val poster: Poster,
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "reaction")
-    val posterReaction: ReactionEnum,
+    val posterReaction: String,
 
     @Column(name = "created_at")
     val createDate: OffsetDateTime = OffsetDateTime.now(),

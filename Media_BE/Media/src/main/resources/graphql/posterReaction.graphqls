@@ -12,7 +12,7 @@ enum ReactionEnum {
 type PosterReaction {
     posterReactionId: ID!
     poster: Poster,
-    posterReaction: ReactionEnum!
+    posterReaction: String!
     createDate: DateTime
     user: User
 }
@@ -22,21 +22,21 @@ type PosterReactionDTO{
     posterId: ID,
     username: String,
     avatar: String,
-    reaction: ReactionEnum!
+    reaction: String!
     createDate: DateTime
 }
 
 type ReactionSummaryDTO {
-    reaction: ReactionEnum!
+    reaction: String!
     count: Int!
 }
 
 extend type Query {
-    countReactions(posterId: ID!, reaction: ReactionEnum): Int
+    countReactions(posterId: ID!, reaction: String): Int
     getReactionsForPoster(posterId: ID!): [PosterReactionDTO]
     getReactionSummary(posterId: ID!): [ReactionSummaryDTO]
 }
 
 extend type Mutation {
-    reactionPoster(userId: ID, posterId: ID, reaction: ReactionEnum): PosterReaction
+    reactionPoster(userId: ID, posterId: ID, reaction: String): PosterReaction
 }

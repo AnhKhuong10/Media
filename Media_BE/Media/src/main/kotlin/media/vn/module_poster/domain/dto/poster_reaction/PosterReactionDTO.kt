@@ -8,6 +8,6 @@ data class PosterReactionDTO(
     val posterId: Long,
     val username: String,
     val avatar: String?,
-    val reaction: ReactionEnum,
+    val reaction: String,
     val createdAt: OffsetDateTime
 )

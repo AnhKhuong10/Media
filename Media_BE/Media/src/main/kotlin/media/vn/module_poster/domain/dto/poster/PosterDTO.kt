@@ -17,13 +17,15 @@ data class PosterDTO(
     val updatedBy: String,
     val user: UserPoster,
     val totalReactions: Long = 0,
-    val reactionSummary: List<ReactionSummaryDTO>? = null
+    val reactionSummary: List<ReactionSummaryDTO>? = null,
+    val isDraft: Boolean = false,
 ){
     data class UserPoster(
+        val userId: Long,
         val fullName: String,
         val dob: LocalDate?,
         val homeTown: String,
         val avatar: String,
-        val roleName: String
+        val roleName: String,
     )
 }
