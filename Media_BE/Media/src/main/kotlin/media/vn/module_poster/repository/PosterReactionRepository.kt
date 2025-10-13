@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param
 interface PosterReactionRepository : JpaRepository<PosterReaction, Long> {
 
     fun findByPosterAndUser(poster: Poster, user: User): PosterReaction?
-    fun countByPosterAndPosterReaction(poster: Poster, reaction: ReactionEnum): Long
+    fun countByPosterAndPosterReaction(poster: Poster, posterReaction: String): Long
     fun findByPoster(poster: Poster): List<PosterReaction>
 
     @Query("SELECT r FROM PosterReaction r WHERE r.poster.posterId IN :posterIds")

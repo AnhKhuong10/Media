@@ -38,7 +38,7 @@ class PosterReactionMutation(
     fun reactionPoster(
         @Argument userId: Long,
         @Argument posterId: Long,
-        @Argument reaction: ReactionEnum,
+        @Argument reaction: String,
     ): PosterReaction{
         return posterReactionService.reactPoster(userId, posterId, reaction)
     }

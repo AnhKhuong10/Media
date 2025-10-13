@@ -20,7 +20,7 @@ class PosterReactionServiceImpl(
     private val userRepository: UserRepository,
     private val posterRepository: PosterRepository
 ): PosterReactionService {
-    override fun reactPoster(userId: Long, posterId: Long, reaction: ReactionEnum): PosterReaction {
+    override fun reactPoster(userId: Long, posterId: Long, emoji: String): PosterReaction {
         val user = userRepository.findById(userId)
             .orElseThrow { BusinessException(ErrorCode.NOT_FOUND, "User not found") }
 
@@ -30,13 +30,13 @@ class PosterReactionServiceImpl(
         val existingsReaction = posterReactionRepository.findByPosterAndUser(poster, user)
 
         return if(existingsReaction != null){
-            val updated = existingsReaction.copy(posterReaction = reaction)
+            val updated = existingsReaction.copy(posterReaction = emoji)
             updated.updateDate = OffsetDateTime.now()
             posterReactionRepository.save(updated)
         }else{
             val newReaction = PosterReaction(
                 poster = poster,
-                posterReaction = reaction,
+                posterReaction = emoji,
                 createDate = OffsetDateTime.now(),
                 updateDate = OffsetDateTime.now(),
                 user = user
@@ -46,7 +46,7 @@ class PosterReactionServiceImpl(
 
     }
 
-    override fun countReactions(posterId: Long, reaction: ReactionEnum): Long {
+    override fun countReactions(posterId: Long, reaction: String): Long {
         val poster = posterRepository.findById(posterId)
             .orElseThrow { BusinessException(ErrorCode.NOT_FOUND, "Post not found") }
         return posterReactionRepository.countByPosterAndPosterReaction(poster, reaction)

@@ -24,6 +24,7 @@ type Poster {
 }
 
 type UserPoster{
+    userId: ID,
     fullName: String,
     dob: Date,
     homeTown: String,
@@ -44,6 +45,7 @@ type PosterDTO{
     user: UserPoster
     totalReactions: Int
     reactionSummary: [ReactionSummaryDTO]
+    isDraft: Boolean
 }
 
 type PosterPage{
