@@ -42,6 +42,8 @@ type PosterDTO{
     createdBy: String
     updatedBy: String
     user: UserPoster
+    totalReactions: Int
+    reactionSummary: [ReactionSummaryDTO]
 }
 
 type PosterPage{
